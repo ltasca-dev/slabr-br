@@ -1450,6 +1450,96 @@ loadDashboard();
 </body></html>"""
     return html
 
+@app.get("/catalogo")
+def pagina_catalogo():
+    """Catálogo de colecionadores com galerias visuais"""
+    colecionadores = db().execute("""
+        SELECT DISTINCT u.handle, u.name, u.city,
+               COUNT(DISTINCT gi.cert_id) as total_cards,
+               SUM(gi.declared_value_cents) / 100.0 as total_value
+        FROM users u
+        LEFT JOIN graded_items gi ON LOWER(gi.owner_handle) = LOWER(u.handle) AND gi.public = 1
+        GROUP BY u.handle, u.name, u.city
+        HAVING COUNT(DISTINCT gi.cert_id) > 0
+        ORDER BY total_value DESC NULLS LAST
+        LIMIT 100
+    """).fetchall()
+
+    html = """<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Catálogo de Colecionadores - SLABR</title>
+<style>
+:root{--vault:#0c0f13;--vault-2:#13171e;--ice:#eef2f7;--mist:#97a1b0;--champagne:#e7c47a;--line:rgba(255,255,255,.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--ice);background:linear-gradient(135deg,var(--vault) 0%,#0f1535 100%);min-height:100vh}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+header{position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);background:linear-gradient(to bottom,rgba(12,15,19,.94),rgba(12,15,19,.66));border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:26px;height:66px}
+.brand{font-weight:800;font-size:20px;cursor:pointer;color:var(--champagne)}
+nav{display:flex;gap:20px}
+nav a{color:var(--mist);font-size:14px;font-weight:500;cursor:pointer}
+nav a:hover{color:var(--ice)}
+.hero{padding:60px 0;text-align:center;background:linear-gradient(135deg,rgba(231,196,122,.05) 0%,rgba(231,196,122,.02) 100%);border-bottom:1px solid var(--line)}
+.hero h1{font-size:48px;margin-bottom:10px;font-weight:800;color:var(--champagne)}
+.hero p{color:var(--mist);font-size:16px;margin:10px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;margin-top:40px}
+.collector-card{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:all 0.3s;cursor:pointer;display:flex;flex-direction:column}
+.collector-card:hover{border-color:var(--champagne);transform:translateY(-5px);box-shadow:0 10px 30px rgba(231,196,122,0.2)}
+.card-header{padding:20px;border-bottom:1px solid var(--line)}
+.collector-name{font-size:18px;font-weight:700;color:var(--ice);margin-bottom:5px}
+.collector-city{font-size:13px;color:var(--mist)}
+.card-body{padding:20px;flex:1}
+.stat-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.stat-row:last-child{border:none}
+.stat-label{color:var(--mist);font-size:12px}
+.stat-value{color:var(--champagne);font-weight:700}
+.card-footer{padding:15px 20px;background:var(--vault-3);border-top:1px solid var(--line)}
+.btn{padding:10px 16px;background:var(--champagne);color:var(--vault);border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;width:100%}
+.btn:hover{opacity:0.9}
+footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:var(--mist);font-size:12px;margin-top:60px}
+</style>
+</head><body>
+<header><div class="bar"><div class="brand" onclick="location.href='/'">SLABR</div><nav><a onclick="location.href='/'">Home</a><a onclick="location.href='/marketplace'">Marketplace</a><a onclick="location.href='/colecionadores'">Ranking</a></nav></div></header>
+
+<div class="hero">
+    <div class="wrap">
+        <h1>📚 Catálogo de Colecionadores</h1>
+        <p>Explore as galerias visuais dos maiores colecionadores brasileiros</p>
+    </div>
+</div>
+
+<div class="wrap">
+    <div class="grid">"""
+
+    for col in colecionadores:
+        value_display = f"R$ {col['total_value']:,.0f}" if col['total_value'] else "R$ 0"
+        html += f"""        <div class="collector-card">
+            <div class="card-header">
+                <div class="collector-name">@{col['handle']}</div>
+                <div class="collector-city">📍 {col['city'] or 'Brasil'}</div>
+            </div>
+            <div class="card-body">
+                <div class="stat-row">
+                    <span class="stat-label">Cartas Graduadas</span>
+                    <span class="stat-value">{col['total_cards'] or 0}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Patrimônio</span>
+                    <span class="stat-value">{value_display}</span>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button class="btn" onclick="location.href='/colecionador/{col['handle']}'">Ver Galeria</button>
+            </div>
+        </div>"""
+
+    html += """    </div>
+</div>
+
+<footer><p>SLABR - Catálogo de Colecionadores | Galeria Visual</p></footer>
+</body></html>"""
+    return html
+
 @app.get("/colecionador/<handle>")
 def pagina_colecionador(handle):
     """Pagina publica do perfil de um colecionador"""
