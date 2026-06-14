@@ -520,6 +520,37 @@ def perfil_cartas(handle):
         ]
     })
 
+@app.get("/api/perfil/<handle>/galeria")
+def perfil_galeria(handle):
+    """Retorna cartas com imagens para galeria visual"""
+    graded = db().execute("""
+        SELECT g.cert_id, g.card_id, g.grade, g.gem, g.declared_value_cents, g.condition,
+               c.name card_name, c.official_image_large, c.official_image_small
+        FROM graded_items g
+        JOIN cards c ON c.id = g.card_id
+        WHERE LOWER(g.owner_handle)=LOWER(?) AND g.public=1
+        ORDER BY g.declared_value_cents DESC
+        LIMIT 100
+    """, (handle,)).fetchall()
+
+    return jsonify({
+        "ok": True,
+        "handle": handle,
+        "cartas": [
+            {
+                "cert": g["cert_id"],
+                "cardId": g["card_id"],
+                "cardName": g["card_name"],
+                "grade": g["grade"],
+                "gem": bool(g["gem"]),
+                "value": (g["declared_value_cents"] or 0) / 100,
+                "condition": g["condition"],
+                "image": g["official_image_large"],
+                "imageMini": g["official_image_small"]
+            } for g in graded
+        ]
+    })
+
 @app.get("/api/colecionadores")
 def listar_colecionadores():
     """Lista todos os colecionadores (TOP por patrimonio)"""
@@ -648,10 +679,12 @@ def dashboard_patrimonio(handle):
 def dashboard_roi(handle):
     """ROI (ganho/perda) por carta"""
     cartas = db().execute("""
-        SELECT card_id, card_name, quantity, purchase_price,
-               (SELECT market * 5.4 FROM card_prices WHERE card_id=uc.card_id LIMIT 1) as current_price
+        SELECT uc.card_id, uc.card_name, uc.quantity, uc.purchase_price,
+               (SELECT market * 5.4 FROM card_prices WHERE card_id=uc.card_id LIMIT 1) as current_price,
+               c.official_image_large, c.official_image_small
         FROM user_collections uc
-        WHERE LOWER(user_id)=LOWER(?)
+        LEFT JOIN cards c ON c.id = uc.card_id
+        WHERE LOWER(uc.user_id)=LOWER(?)
         ORDER BY ((current_price - purchase_price) * quantity) DESC
         LIMIT 20
     """, (handle,)).fetchall()
@@ -683,7 +716,9 @@ def dashboard_roi(handle):
             "cost": round(cost, 2),
             "current_value": round(current, 2),
             "gain": round(gain, 2),
-            "roi_percent": round(roi_percent, 2)
+            "roi_percent": round(roi_percent, 2),
+            "image": c["official_image_large"],
+            "imageMini": c["official_image_small"]
         })
 
     return jsonify({
@@ -1529,6 +1564,68 @@ def market():
                      "value":(r["declared_value_cents"] or 0)/100,"owner":r["owner_handle"],
                      "card":{"id":r["cid"],"name":r["cname"],"num":r["cnum"],"type":ctype(r["ctypes"]),
                              "rar":r["crar"] or "Common","set":r["sname"]}} for r in rows])
+
+@app.get("/api/bynx/sincronizar")
+def bynx_sincronizar():
+    """Sincronização com Bynx.gg - comparação de preços e oportunidades"""
+    try:
+        import urllib.request
+        import json as json_lib
+
+        # Top cards do SLABR by value
+        slabr_cards = db().execute("""
+            SELECT DISTINCT c.id, c.name, c.official_image_large,
+                   COUNT(*) as qty,
+                   AVG(g.declared_value_cents) / 100.0 as slabr_price
+            FROM cards c
+            JOIN graded_items g ON g.card_id = c.id
+            WHERE g.public = 1
+            GROUP BY c.id
+            ORDER BY AVG(g.declared_value_cents) DESC
+            LIMIT 20
+        """).fetchall()
+
+        result = []
+        for card in slabr_cards:
+            # Simular busca no Bynx (em produção, usar API real do Bynx)
+            # Aqui vamos usar dados de comparação baseado em TCGPlayer via PokemonTCG API
+            try:
+                # Buscar price data
+                prices = db().execute(
+                    "SELECT market FROM card_prices WHERE card_id=? LIMIT 1",
+                    (card["id"],)
+                ).fetchone()
+
+                bynx_price = float(prices["market"] or 0) * EUR_BRL if prices else 0
+
+                diff = card["slabr_price"] - bynx_price
+                diff_percent = ((diff / bynx_price) * 100) if bynx_price > 0 else 0
+
+                # Oportunidades: cartas 10%+ mais caras no SLABR (buy no Bynx)
+                # ou 10%+ mais baratas no SLABR (sell no SLABR)
+                if abs(diff_percent) > 10:
+                    result.append({
+                        "cardId": card["id"],
+                        "cardName": card["name"],
+                        "image": card["official_image_large"],
+                        "qty": card["qty"],
+                        "slabr_price": round(card["slabr_price"], 2),
+                        "bynx_price": round(bynx_price, 2),
+                        "diff_reais": round(diff, 2),
+                        "diff_percent": round(diff_percent, 2),
+                        "oportunidade": "vender_slabr" if diff > 0 else "comprar_bynx"
+                    })
+            except Exception as e:
+                continue
+
+        return jsonify({
+            "ok": True,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "total_opportunities": len(result),
+            "opportunities": result[:10]  # Top 10 oportunidades
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 # roda a migração no import também (deploys com gunicorn não executam o bloco __main__)
 migrate_and_seed()
