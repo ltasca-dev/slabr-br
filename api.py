@@ -206,13 +206,15 @@ def collectors():
 
 @app.get("/api/collector/<handle>")
 def collector(handle):
-    rows=db().execute("""SELECT g.*, c.name cname, c.number cnum, c.types ctypes, c.rarity crar, s.name sname
+    rows=db().execute("""SELECT g.*, c.name cname, c.number cnum, c.types ctypes, c.rarity crar, s.name sname,
+                                c.official_image_large, c.official_image_small
                          FROM graded_items g JOIN cards c ON c.id=g.card_id JOIN sets s ON s.id=c.set_id
                          WHERE g.owner_handle=? AND g.public=1 ORDER BY g.declared_value_cents DESC""",(handle,)).fetchall()
     items=[]
     for r in rows:
         d=graded_row(r); d["card"]={"id":r["card_id"],"name":r["cname"],"num":r["cnum"],
-                                    "type":ctype(r["ctypes"]),"rar":r["crar"] or "Common","set":r["sname"]}
+                                    "type":ctype(r["ctypes"]),"rar":r["crar"] or "Common","set":r["sname"],
+                                    "image":r["official_image_large"],"imageMini":r["official_image_small"]}
         items.append(d)
     val=sum(i["value"] for i in items); gems=sum(1 for i in items if i["gem"])
     ranks=[r["owner"] for r in db().execute("""SELECT owner_handle owner FROM graded_items WHERE public=1

@@ -512,7 +512,7 @@ async function renderColecionador(handle){
     </div></div>
   </div>
   <div class="section-h"><h2>Vitrine</h2><span>${d.n} no acrílico</span></div>
-  <div class="grid">${d.items.length?d.items.map(it=>`<div class="item" onclick="location.hash='#/carta/${it.card.id}'">${thumb(it.card,it.scan,'<div class="pop"><span class="popbadge">'+tag(it)+'</span></div>')}<div class="cap"><div class="cn">${it.card.name}</div><div class="cm">${brl(it.value)}</div></div></div>`).join(''):'<p class="muted">Nenhuma carta pública.</p>'}</div>`;
+  <div class="grid">${d.items.length?d.items.map(it=>`<div class="item" onclick="location.hash='#/carta/${it.card.id}'">${thumb(it.card,it.scan||it.card.image,'<div class="pop"><span class="popbadge">'+tag(it)+'</span></div>')}<div class="cap"><div class="cn">${it.card.name}</div><div class="cm">${brl(it.value)}</div></div></div>`).join(''):'<p class="muted">Nenhuma carta pública.</p>'}</div>`;
 }
 async function renderAddCard(){
  let sel=null, graded=false, pub=true, sale=false, scan=null;
