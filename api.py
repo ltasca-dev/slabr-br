@@ -1466,50 +1466,215 @@ def pagina_catalogo():
     """).fetchall()
 
     html = """<!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Catálogo de Colecionadores - SLABR</title>
-<style>
-:root{--vault:#0c0f13;--vault-2:#13171e;--ice:#eef2f7;--mist:#97a1b0;--champagne:#e7c47a;--line:rgba(255,255,255,.07)}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',system-ui,sans-serif;color:var(--ice);background:linear-gradient(135deg,var(--vault) 0%,#0f1535 100%);min-height:100vh}
-.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
-header{position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);background:linear-gradient(to bottom,rgba(12,15,19,.94),rgba(12,15,19,.66));border-bottom:1px solid var(--line)}
-.bar{display:flex;align-items:center;gap:26px;height:66px}
-.brand{font-weight:800;font-size:20px;cursor:pointer;color:var(--champagne)}
-nav{display:flex;gap:20px}
-nav a{color:var(--mist);font-size:14px;font-weight:500;cursor:pointer}
-nav a:hover{color:var(--ice)}
-.hero{padding:60px 0;text-align:center;background:linear-gradient(135deg,rgba(231,196,122,.05) 0%,rgba(231,196,122,.02) 100%);border-bottom:1px solid var(--line)}
-.hero h1{font-size:48px;margin-bottom:10px;font-weight:800;color:var(--champagne)}
-.hero p{color:var(--mist);font-size:16px;margin:10px 0}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;margin-top:40px}
-.collector-card{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:all 0.3s;cursor:pointer;display:flex;flex-direction:column}
-.collector-card:hover{border-color:var(--champagne);transform:translateY(-5px);box-shadow:0 10px 30px rgba(231,196,122,0.2)}
-.card-header{padding:20px;border-bottom:1px solid var(--line)}
-.collector-name{font-size:18px;font-weight:700;color:var(--ice);margin-bottom:5px}
-.collector-city{font-size:13px;color:var(--mist)}
-.card-body{padding:20px;flex:1}
-.stat-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
-.stat-row:last-child{border:none}
-.stat-label{color:var(--mist);font-size:12px}
-.stat-value{color:var(--champagne);font-weight:700}
-.card-footer{padding:15px 20px;background:var(--vault-3);border-top:1px solid var(--line)}
-.btn{padding:10px 16px;background:var(--champagne);color:var(--vault);border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;width:100%}
-.btn:hover{opacity:0.9}
-footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:var(--mist);font-size:12px;margin-top:60px}
-</style>
-</head><body>
-<header><div class="bar"><div class="brand" onclick="location.href='/'">SLABR</div><nav><a onclick="location.href='/'">Home</a><a onclick="location.href='/marketplace'">Marketplace</a><a onclick="location.href='/colecionadores'">Ranking</a></nav></div></header>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - SLABR</title>
+    <style>
+        :root {
+            --vault: #0c0f13;
+            --vault-2: #13171e;
+            --vault-3: #1a1f28;
+            --ice: #eef2f7;
+            --mist: #97a1b0;
+            --champagne: #e7c47a;
+            --line: rgba(255,255,255,.07);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--ice);
+            background: linear-gradient(135deg, var(--vault) 0%, #0f1535 100%);
+            min-height: 100vh;
+        }
+        .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
-<div class="hero">
-    <div class="wrap">
-        <h1>📚 Catálogo de Colecionadores</h1>
-        <p>Explore as galerias visuais dos maiores colecionadores brasileiros</p>
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            background: linear-gradient(to bottom, rgba(12,15,19,.94), rgba(12,15,19,.66));
+            border-bottom: 1px solid var(--line);
+        }
+        .bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 66px;
+            padding: 0 24px;
+        }
+        .brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--champagne);
+            cursor: pointer;
+        }
+        nav {
+            display: flex;
+            gap: 30px;
+            flex: 1;
+            margin-left: 50px;
+        }
+        nav a {
+            color: var(--mist);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 4px;
+            text-decoration: none;
+        }
+        nav a:hover, nav a.active {
+            color: var(--ice);
+            border-bottom-color: var(--champagne);
+        }
+
+        .hero {
+            padding: 80px 24px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(231,196,122,.05) 0%, rgba(231,196,122,.02) 100%);
+            border-bottom: 1px solid var(--line);
+        }
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: 800;
+            color: var(--champagne);
+        }
+        .hero p {
+            color: var(--mist);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        section { padding: 60px 0; }
+        section h2 {
+            font-size: 32px;
+            color: var(--champagne);
+            margin-bottom: 30px;
+            font-weight: 800;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+        .collector-card {
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        .collector-card:hover {
+            border-color: var(--champagne);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(231,196,122,0.2);
+        }
+        .card-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--line);
+        }
+        .collector-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ice);
+            margin-bottom: 5px;
+        }
+        .collector-city {
+            font-size: 13px;
+            color: var(--mist);
+        }
+        .card-body {
+            padding: 20px;
+            flex: 1;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line);
+        }
+        .stat-row:last-child { border: none; }
+        .stat-label {
+            color: var(--mist);
+            font-size: 12px;
+        }
+        .stat-value {
+            color: var(--champagne);
+            font-weight: 700;
+        }
+        .card-footer {
+            padding: 15px 20px;
+            background: var(--vault-3);
+            border-top: 1px solid var(--line);
+        }
+        .btn-primary {
+            padding: 10px 16px;
+            background: var(--champagne);
+            color: var(--vault);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            width: 100%;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231,196,122,0.3);
+        }
+
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 30px 0;
+            text-align: center;
+            color: var(--mist);
+            font-size: 12px;
+            margin-top: 60px;
+        }
+        @media (max-width: 768px) {
+            nav { gap: 15px; margin-left: 30px; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="bar">
+            <div class="brand" onclick="location.href='/'">SLABR</div>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/marketplace">Marketplace</a>
+                <a href="/colecionadores">Colecionadores</a>
+                <a href="/catalogo" class="active">Catálogo</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="hero">
+        <div class="wrap">
+            <h1>Catálogo de Colecionadores</h1>
+            <p>Explore as galerias visuais dos maiores colecionadores brasileiros</p>
+        </div>
     </div>
-</div>
 
-<div class="wrap">
-    <div class="grid">"""
+    <div class="wrap">
+        <section>
+            <div class="grid">"""
 
     for col in colecionadores:
         value_display = f"R$ {col['total_value']:,.0f}" if col['total_value'] else "R$ 0"
@@ -1529,15 +1694,20 @@ footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:v
                 </div>
             </div>
             <div class="card-footer">
-                <button class="btn" onclick="location.href='/colecionador/{col['handle']}'">Ver Galeria</button>
+                <a href="/colecionador/{col['handle']}" class="btn-primary">Ver Galeria</a>
             </div>
         </div>"""
 
-    html += """    </div>
-</div>
+    html += """            </div>
+        </section>
+    </div>
 
-<footer><p>SLABR - Catálogo de Colecionadores | Galeria Visual</p></footer>
-</body></html>"""
+    <footer class="wrap">
+        <p>SLABR - Marketplace de Trading Cards | Plataforma segura para colecionadores brasileiros</p>
+        <p style="margin-top: 15px; font-size: 11px; opacity: 0.7;">Catálogo | Galeria Visual | Explore Colecionadores</p>
+    </footer>
+</body>
+</html>"""
     return html
 
 @app.get("/colecionador/<handle>")
