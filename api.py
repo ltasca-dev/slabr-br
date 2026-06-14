@@ -1481,8 +1481,9 @@ nav a:hover{{color:var(--ice);border-bottom-color:var(--champagne)}}
 .stat-label{{font-size:12px;color:var(--mist);text-transform:uppercase;margin-bottom:10px;letter-spacing:0.1em}}
 .stat-value{{font-size:24px;font-weight:800;color:var(--champagne)}}
 .gallery{{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;margin-top:30px}}
-.gallery-card{{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:all 0.3s;cursor:pointer}}
+.gallery-card{{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:all 0.3s;cursor:pointer;animation:fadeInCard 0.5s ease-out}}
 .gallery-card:hover{{border-color:var(--champagne);transform:translateY(-8px);box-shadow:0 12px 40px rgba(231,196,122,0.3)}}
+@keyframes fadeInCard{{from{{opacity:0;transform:translateY(20px)}}to{{opacity:1;transform:translateY(0)}}}}
 .card-image{{width:100%;aspect-ratio:2.5/3.5;background:linear-gradient(135deg,var(--vault) 0%,var(--vault-3) 100%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}}
 .card-image img{{width:100%;height:100%;object-fit:contain;padding:8px}}
 .card-image.loading{{background:linear-gradient(90deg,var(--vault-3) 25%,var(--vault) 50%,var(--vault-3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}}
@@ -1540,10 +1541,10 @@ async function loadGaleria() {{
             return;
         }}
 
-        grid.innerHTML = data.cartas.map((c, idx) => `
-            <div class="gallery-card" style="animation:fadeIn 0.3s ease-in ${{animation-delay: ${{idx * 30}}ms}}">
+        grid.innerHTML = data.cartas.map((c) => `
+            <div class="gallery-card">
                 <div class="card-image loading" id="img-${{c.cert}}">
-                    <img src="${{c.image}}" alt="${{c.cardName}}" onload="this.parentElement.classList.remove('loading')" onerror="this.parentElement.textContent='Erro carregando imagem'">
+                    <img src="${{c.image}}" alt="${{c.cardName}}" onload="this.parentElement.classList.remove('loading')" onerror="this.parentElement.textContent='Erro'">
                     <span class="card-grade">${{c.grade}}</span>
                     ${{c.gem ? '<span class="card-gem">✨</span>' : ''}}
                 </div>
