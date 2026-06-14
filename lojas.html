@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Lojas - SLABR</title>
+    <style>
+        :root {
+            --vault: #0c0f13;
+            --vault-2: #13171e;
+            --vault-3: #1a1f28;
+            --ice: #eef2f7;
+            --mist: #97a1b0;
+            --champagne: #e7c47a;
+            --line: rgba(255,255,255,.07);
+            --ok: #4ade80;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--ice);
+            background: linear-gradient(135deg, var(--vault) 0%, #0f1535 100%);
+            min-height: 100vh;
+        }
+        .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            background: linear-gradient(to bottom, rgba(12,15,19,.94), rgba(12,15,19,.66));
+            border-bottom: 1px solid var(--line);
+        }
+        .bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 66px;
+            padding: 0 24px;
+        }
+        .brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--champagne);
+            cursor: pointer;
+        }
+
+        .hero {
+            padding: 60px 24px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(231,196,122,.05) 0%, rgba(231,196,122,.02) 100%);
+            border-bottom: 1px solid var(--line);
+        }
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+            font-weight: 800;
+        }
+        .hero h1 em {
+            font-style: normal;
+            color: var(--champagne);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        input, select {
+            padding: 10px 15px;
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            color: var(--ice);
+            font-size: 14px;
+        }
+        input::placeholder { color: var(--mist); }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--champagne);
+        }
+
+        .lojas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .loja-card {
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        .loja-card:hover {
+            border-color: var(--champagne);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(231,196,122,0.2);
+        }
+
+        .loja-header {
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(231,196,122,.1) 0%, transparent 100%);
+            border-bottom: 1px solid var(--line);
+        }
+        .loja-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--vault-3);
+            border: 1px solid var(--champagne);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--champagne);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .loja-nome {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--ice);
+        }
+        .loja-cidade {
+            font-size: 13px;
+            color: var(--mist);
+        }
+
+        .loja-body {
+            padding: 20px;
+            flex: 1;
+        }
+        .loja-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .stars {
+            color: #fbbf24;
+        }
+        .loja-desc {
+            font-size: 13px;
+            color: var(--mist);
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        .loja-info {
+            font-size: 12px;
+            color: var(--mist);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .loja-info strong {
+            color: var(--ice);
+        }
+
+        .loja-footer {
+            padding: 15px 20px;
+            background: var(--vault-3);
+            border-top: 1px solid var(--line);
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--champagne);
+            color: var(--vault);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231,196,122,0.3);
+        }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--line);
+            color: var(--ice);
+        }
+
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 30px 0;
+            text-align: center;
+            color: var(--mist);
+            font-size: 12px;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .lojas-grid { grid-template-columns: 1fr; }
+            .filters { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="bar">
+            <div class="brand" onclick="location.href='/home-public'">🃏 SLABR</div>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="wrap">
+            <h1>🏪 Guia de <em>Lojas</em> Brasileiras</h1>
+            <p>Encontre as melhores lojas para comprar e vender cartas no Brasil</p>
+        </div>
+    </div>
+
+    <div class="wrap">
+        <!-- FILTROS -->
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Buscar loja por nome..." onchange="applyFilters()">
+            <select id="typeFilter" onchange="applyFilters()">
+                <option value="">Todos os tipos</option>
+                <option value="Física">Física</option>
+                <option value="Online">Online</option>
+            </select>
+            <select id="cityFilter" onchange="applyFilters()">
+                <option value="">Todas as cidades</option>
+                <option value="São Paulo">São Paulo</option>
+                <option value="Belo Horizonte">Belo Horizonte</option>
+                <option value="Rio de Janeiro">Rio de Janeiro</option>
+                <option value="Curitiba">Curitiba</option>
+                <option value="Porto Alegre">Porto Alegre</option>
+            </select>
+        </div>
+
+        <!-- LOJAS -->
+        <div id="lojas-container" class="lojas-grid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--mist);">
+                Carregando lojas...
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="wrap">
+        <p>SLABR - Guia de Lojas de Trading Cards no Brasil</p>
+    </footer>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        let allLojas = [];
+
+        async function loadLojas() {
+            try {
+                const res = await fetch(`${API_BASE}/api/lojas`);
+                const data = await res.json();
+
+                if (!data.ok) {
+                    document.getElementById('lojas-container').innerHTML =
+                        '<div style="grid-column: 1/-1; color: red;">Erro ao carregar lojas</div>';
+                    return;
+                }
+
+                allLojas = data.lojas || [];
+                renderLojas(allLojas);
+            } catch (e) {
+                console.error('Erro:', e);
+                document.getElementById('lojas-container').innerHTML =
+                    '<div style="grid-column: 1/-1; color: red;">Erro ao conectar</div>';
+            }
+        }
+
+        function renderLojas(lojas) {
+            const container = document.getElementById('lojas-container');
+
+            if (lojas.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--mist);">Nenhuma loja encontrada</div>';
+                return;
+            }
+
+            container.innerHTML = lojas.map(l => {
+                const isOnline = l.tipo === 'Online';
+                const contact = isOnline ?
+                    (l.whatsapp ? `+55${l.whatsapp}` : '#') :
+                    (l.telefone || '#');
+
+                return `
+                    <div class="loja-card">
+                        <div class="loja-header">
+                            <div class="loja-badge">${l.tipo}</div>
+                            <div class="loja-nome">${l.nome}</div>
+                            <div class="loja-cidade">${l.cidade}</div>
+                        </div>
+                        <div class="loja-body">
+                            <div class="loja-rating">
+                                <span class="stars">${'⭐'.repeat(Math.floor(l.rating))}</span>
+                                <span>${l.rating}/5</span>
+                            </div>
+                            <div class="loja-desc">${l.descricao}</div>
+                            ${l.endereco ? `<div class="loja-info"><strong>📍 ${l.endereco}</strong></div>` : ''}
+                            ${l.telefone ? `<div class="loja-info">📞 <strong>${l.telefone}</strong></div>` : ''}
+                            ${l.whatsapp ? `<div class="loja-info">💬 <strong>WhatsApp: ${l.whatsapp}</strong></div>` : ''}
+                            ${l.instagram ? `<div class="loja-info">📱 <strong>${l.instagram}</strong></div>` : ''}
+                        </div>
+                        <div class="loja-footer">
+                            <button class="btn" onclick="window.open('https://wa.me/${contact}', '_blank')">
+                                ${isOnline ? 'WhatsApp' : 'Ligar'}
+                            </button>
+                            <button class="btn btn-secondary" onclick="location.href='/perfil'">Ver Avaliações</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const type = document.getElementById('typeFilter').value;
+            const city = document.getElementById('cityFilter').value;
+
+            const filtered = allLojas.filter(l =>
+                (l.nome.toLowerCase().includes(search) || l.descricao.toLowerCase().includes(search)) &&
+                (!type || l.tipo === type) &&
+                (!city || l.cidade.includes(city))
+            );
+
+            renderLojas(filtered);
+        }
+
+        window.addEventListener('load', loadLojas);
+    </script>
+</body>
+</html>

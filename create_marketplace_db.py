@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS marketplace_listings (
     quantity INTEGER DEFAULT 1,
     price DECIMAL(10,2),
     condition VARCHAR(20),
+    description TEXT,
     listing_type VARCHAR(20), -- 'sale' ou 'trade'
     status VARCHAR(20), -- 'active', 'sold', 'cancelled', 'expired'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -33,6 +34,8 @@ CREATE TABLE IF NOT EXISTS marketplace_trades (
     buyer_id TEXT NOT NULL,
     seller_id TEXT NOT NULL,
     amount DECIMAL(10,2),
+    offered_price DECIMAL(10,2),
+    message TEXT,
     status VARCHAR(20), -- 'pending', 'escrow', 'shipped', 'completed', 'cancelled'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

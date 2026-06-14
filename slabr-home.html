@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLABR - Marketplace de Cards</title>
+    <style>
+        :root {
+            --vault: #0c0f13;
+            --vault-2: #13171e;
+            --vault-3: #1a1f28;
+            --ice: #eef2f7;
+            --mist: #97a1b0;
+            --champagne: #e7c47a;
+            --line: rgba(255,255,255,.07);
+            --ok: #4ade80;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--ice);
+            background: linear-gradient(135deg, var(--vault) 0%, #0f1535 100%);
+            min-height: 100vh;
+        }
+        .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            background: linear-gradient(to bottom, rgba(12,15,19,.94), rgba(12,15,19,.66));
+            border-bottom: 1px solid var(--line);
+        }
+        .bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 66px;
+            padding: 0 24px;
+        }
+        .brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--champagne);
+            cursor: pointer;
+        }
+        nav {
+            display: flex;
+            gap: 30px;
+            flex: 1;
+            margin-left: 50px;
+        }
+        nav a {
+            color: var(--mist);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 4px;
+        }
+        nav a:hover, nav a.active {
+            color: var(--ice);
+            border-bottom-color: var(--champagne);
+        }
+
+        .hero {
+            padding: 80px 24px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(231,196,122,.05) 0%, rgba(231,196,122,.02) 100%);
+            border-bottom: 1px solid var(--line);
+        }
+        .hero h1 {
+            font-size: clamp(32px, 5vw, 56px);
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        .hero h1 em {
+            font-style: normal;
+            color: var(--champagne);
+        }
+        .hero p {
+            color: var(--mist);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        section {
+            padding: 60px 0;
+        }
+        section h2 {
+            font-size: 32px;
+            color: var(--champagne);
+            margin-bottom: 30px;
+            font-weight: 800;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .card:hover {
+            border-color: var(--champagne);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(231,196,122,0.2);
+        }
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--ice);
+        }
+        .card-desc {
+            font-size: 14px;
+            color: var(--mist);
+            line-height: 1.5;
+        }
+
+        .collectors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .collector-item {
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .collector-item:hover {
+            border-color: var(--champagne);
+            transform: translateY(-5px);
+        }
+        .collector-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ice);
+            margin-bottom: 5px;
+        }
+        .collector-city {
+            font-size: 13px;
+            color: var(--mist);
+            margin-bottom: 10px;
+        }
+        .collector-stats {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--mist);
+        }
+        .collector-stats span {
+            background: var(--vault);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .btn-primary {
+            padding: 12px 24px;
+            background: var(--champagne);
+            color: var(--vault);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231,196,122,0.3);
+        }
+
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 30px 0;
+            text-align: center;
+            color: var(--mist);
+            font-size: 12px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-box {
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid var(--champagne);
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--mist);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.1em;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--champagne);
+        }
+
+        @media (max-width: 768px) {
+            nav { display: none; }
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="bar">
+            <div class="brand" onclick="scrollToTop()">🃏 SLABR</div>
+            <nav>
+                <a onclick="location.href='/marketplace'">🛍️ Marketplace</a>
+                <a onclick="scrollTo('ranking')">Ranking</a>
+                <a onclick="location.href='/buscar'" style="color: var(--champagne);">🔍 Buscar</a>
+                <a onclick="scrollTo('sobre')">Sobre</a>
+            </nav>
+            <a href="http://localhost:5000" class="btn-primary" style="padding: 8px 16px; font-size: 13px;">App Completo</a>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="wrap">
+            <h1>Bem-vindo ao <em>SLABR</em></h1>
+            <p>A plataforma brasileira para colecionadores de Pokémon. Explore perfis, compare coleções e conecte-se com traders.</p>
+        </div>
+    </div>
+
+    <div class="wrap">
+        <!-- MARKETPLACE -->
+        <section id="marketplace">
+            <h2>🛍️ Explore a Plataforma</h2>
+            <div class="grid">
+                <div class="card" onclick="location.href='/marketplace'">
+                    <div class="card-icon">🛒</div>
+                    <div class="card-title">Marketplace P2P</div>
+                    <div class="card-desc">Compre e venda cartas entre colecionadores. Contato via WhatsApp</div>
+                </div>
+                <div class="card" onclick="location.href='/colecionadores'">
+                    <div class="card-icon">🏆</div>
+                    <div class="card-title">Ranking de Colecionadores</div>
+                    <div class="card-desc">Veja os colecionadores com as maiores coleções e patrimônio</div>
+                </div>
+                <div class="card" onclick="location.href='/buscar'">
+                    <div class="card-icon">🔍</div>
+                    <div class="card-title">Buscar Colecionadores</div>
+                    <div class="card-desc">Encontre colecionadores por nome, usuário ou localização</div>
+                </div>
+                <div class="card" onclick="location.href='/'">
+                    <div class="card-icon">📚</div>
+                    <div class="card-title">App Completo</div>
+                    <div class="card-desc">Acesse o sistema completo com login, portfolio e mais</div>
+                </div>
+                <div class="card" onclick="location.href='/ranking-mensal'">
+                    <div class="card-icon">🏆</div>
+                    <div class="card-title">Ranking Mensal</div>
+                    <div class="card-desc">Top 3 colecionadores ganham prêmios (R$ 200/100/50)</div>
+                </div>
+                <div class="card" onclick="location.href='/lojas'">
+                    <div class="card-icon">🏪</div>
+                    <div class="card-title">Guia de Lojas</div>
+                    <div class="card-desc">Encontre as melhores lojas de cards no Brasil</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RANKING -->
+        <section id="ranking">
+            <h2>🏆 Top Colecionadores</h2>
+            <div id="top-collectors" class="collectors-grid">
+                <div style="text-align: center; grid-column: 1/-1; color: var(--mist);">Carregando...</div>
+            </div>
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="/colecionadores" class="btn-primary">Ver Ranking Completo →</a>
+            </div>
+        </section>
+
+        <!-- SOBRE -->
+        <section id="sobre">
+            <h2>ℹ️ Sobre o SLABR</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Colecionadores</div>
+                    <div class="stat-value" id="stat-users">6+</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Cartas Disponíveis</div>
+                    <div class="stat-value">22K+</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Graduações Públicas</div>
+                    <div class="stat-value" id="stat-graded">50+</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Patrimônio Total</div>
+                    <div class="stat-value" id="stat-value">R$ 0</div>
+                </div>
+            </div>
+            <p style="color: var(--mist); line-height: 1.6; margin-top: 20px;">
+                SLABR é uma plataforma integrada para gerenciamento de coleções de trading cards e marketplace descentralizado.
+                Conectamos colecionadores, investidores e lojistas em um ambiente seguro e transparente focado no mercado brasileiro.
+            </p>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="wrap">
+        <p>SLABR - Marketplace de Trading Cards | Plataforma segura para colecionadores brasileiros</p>
+        <p style="margin-top: 15px; font-size: 11px; opacity: 0.7;">Fase 1 ✓ | Perfis Públicos ✓ | Ranking ✓</p>
+    </footer>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        async function loadTopCollectors() {
+            try {
+                const res = await fetch(`${API_BASE}/api/colecionadores`);
+                const data = await res.json();
+                const container = document.getElementById('top-collectors');
+
+                const top5 = (data.colecionadores || []).slice(0, 5);
+
+                if (top5.length === 0) {
+                    container.innerHTML = '<div style="grid-column: 1/-1; color: var(--mist);">Nenhum colecionador encontrado</div>';
+                    return;
+                }
+
+                let totalValue = 0;
+                let totalGraded = 0;
+
+                container.innerHTML = top5.map((c, i) => {
+                    totalValue += c.total_value;
+                    return `
+                        <div class="collector-item" onclick="location.href='/colecionador/${c.handle}'">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <div style="width: 32px; height: 32px; background: var(--champagne); color: var(--vault); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">${i+1}</div>
+                                <div class="collector-name">${c.name}</div>
+                            </div>
+                            <div class="collector-city">📍 ${c.city}</div>
+                            <div class="collector-stats">
+                                <span>💎 ${c.total_cards || 0}</span>
+                                <span>R$ ${(c.total_value || 0).toLocaleString('pt-BR')}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('stat-value').textContent = 'R$ ' + totalValue.toLocaleString('pt-BR');
+            } catch (e) {
+                console.error('Erro:', e);
+                document.getElementById('top-collectors').innerHTML = '<div style="grid-column: 1/-1; color: var(--mist);">Erro ao carregar</div>';
+            }
+        }
+
+        function scrollTo(sectionId) {
+            document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.addEventListener('load', loadTopCollectors);
+    </script>
+</body>
+</html>

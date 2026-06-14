@@ -11,20 +11,11 @@ Contas demo (senha: demo123): raf10, marina.sp, joao_v, ana.bea, lucas_rs, tcg_b
 import sqlite3, json, os, re, datetime
 from flask import Flask, jsonify, request, g, session, Response
 from werkzeug.security import generate_password_hash, check_password_hash
-from scraper_bynx import BynxScraperSync
-from portfolio_routes import portfolio_bp
-from marketplace_routes import marketplace_bp
-from bynx_sync_routes import bynx_sync_bp
 
 DB   = os.environ.get("SLABR_DB", "pokemon_catalog.db")
 HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "slabr_app.html")
 app  = Flask(__name__)
 app.secret_key = os.environ.get("SLABR_SECRET", "troque-este-segredo-em-producao")
-
-# Fase 0: Integração Bynx.gg
-_bynx_scraper = BynxScraperSync()
-_price_cache = {}
-_cache_ttl = 3600  # 1 hora
 
 _SEED_JSON   = r"""[["5295-D71H", "swsh4-171", "TCG", 7, 0, 7, 7.5, 7, 7, null, "lucas_rs", 276000, "2026-03-01T12:00:00Z"], ["6445-F86E", "base1-4", "TCG", 7, 0, 7, 7, 7, 7, null, "joao_v", 336000, "2026-01-01T12:00:00Z"], ["3726-M65D", "swsh4-171", "TCG", 7, 0, 7, 7.5, 7, 7, null, "raf10", 259000, "2026-03-01T12:00:00Z"], ["3393-C71A", "base1-6", "TCG", 9.5, 0, 9.5, 10, 9.5, 9.5, null, "joao_v", 1384000, "2026-02-01T12:00:00Z"], ["3604-M73A", "base1-4", "TCG", 8.5, 0, 8.5, 9.0, 8.5, 8.5, null, "raf10", 690000, "2026-01-01T12:00:00Z"], ["1167-G97C", "base1-6", "TCG", 8, 0, 8, 8, 8, 8, null, "tcg_bsb", 488000, "2026-03-01T12:00:00Z"], ["1320-H30J", "base1-2", "TCG", 7, 0, 7, 7.5, 7, 7, null, "raf10", 394000, "2026-04-01T12:00:00Z"], ["9326-K51J", "base2-11", "TCG", 10, 1, 10, 10, 10, 10, null, "raf10", 2612000, "2026-03-01T12:00:00Z"], ["4812-M15G", "base1-1", "TCG", 9.5, 0, 9.5, 10, 9.5, 9.5, null, "marina.sp", 1522000, "2026-05-01T12:00:00Z"], ["8109-A41E", "base5-3", "TCG", 9.5, 0, 9.5, 10, 9.5, 9.5, null, "tcg_bsb", 1256000, "2026-06-01T12:00:00Z"], ["2108-C75B", "sv1-121", "TCG", 7, 0, 7, 7, 7, 7, null, "raf10", 11000, "2026-03-01T12:00:00Z"], ["4589-D74A", "sv1-121", "TCG", 8, 0, 8, 8.5, 8, 8, null, "joao_v", 14000, "2026-05-01T12:00:00Z"], ["6069-M47P", "base2-11", "TCG", 10, 1, 10, 10, 10, 10, null, "marina.sp", 2422000, "2026-05-01T12:00:00Z"], ["4105-B88P", "base2-11", "TCG", 7, 0, 7, 7.5, 7, 7, null, "lucas_rs", 377000, "2026-02-01T12:00:00Z"], ["3831-H57M", "base5-3", "TCG", 7, 0, 7, 7, 7, 7, null, "ana.bea", 329000, "2026-04-01T12:00:00Z"], ["5226-L47A", "base1-6", "TCG", 10, 1, 10, 10, 10, 10, null, "raf10", 2795000, "2026-02-01T12:00:00Z"], ["4637-K87F", "base1-4", "TCG", 8, 0, 8, 8, 8, 8, null, "lucas_rs", 529000, "2026-02-01T12:00:00Z"], ["5981-J51G", "base1-16", "TCG", 10, 1, 10, 10, 10, 10, null, "marina.sp", 2681000, "2026-02-01T12:00:00Z"], ["1563-F90P", "cel25-2", "TCG", 10, 1, 10, 10, 10, 10, null, "marina.sp", 511000, "2026-01-01T12:00:00Z"], ["2162-B81H", "base1-2", "TCG", 7, 0, 7, 7.5, 7, 7, null, "tcg_bsb", 408000, "2026-02-01T12:00:00Z"], ["5274-B13F", "swsh4-171", "TCG", 7, 0, 7, 7.5, 7, 7, null, "marina.sp", 267000, "2026-02-01T12:00:00Z"], ["7536-G51H", "base5-3", "TCG", 8.5, 0, 8.5, 8.5, 8.5, 8.5, null, "marina.sp", 724000, "2026-06-01T12:00:00Z"], ["9823-E62D", "sv1-121", "TCG", 10, 1, 10, 10, 10, 10, null, "joao_v", 67000, "2026-06-01T12:00:00Z"], ["3852-A57H", "sv1-121", "TCG", 8, 0, 8, 8.5, 8, 8, null, "tcg_bsb", 15000, "2026-02-01T12:00:00Z"], ["1608-H40B", "base1-2", "TCG", 8.5, 0, 8.5, 8.5, 8.5, 8.5, null, "tcg_bsb", 670000, "2026-02-01T12:00:00Z"], ["3872-B76E", "swsh4-171", "TCG", 7, 0, 7, 7.5, 7, 7, null, "lucas_rs", 239000, "2026-06-01T12:00:00Z"], ["1414-L67N", "base1-16", "TCG", 10, 1, 10, 10, 10, 10, null, "marina.sp", 2518000, "2026-01-01T12:00:00Z"], ["7668-C85A", "base1-4", "TCG", 8, 0, 8, 8.5, 8, 8, null, "marina.sp", 567000, "2026-04-01T12:00:00Z"], ["4688-K84H", "cel25-2", "TCG", 8.5, 0, 8.5, 8.5, 8.5, 8.5, null, "marina.sp", 171000, "2026-06-01T12:00:00Z"], ["2548-E34H", "cel25-2", "TCG", 10, 1, 10, 10, 10, 10, null, "marina.sp", 613000, "2026-01-01T12:00:00Z"], ["4085-C17H", "sv1-121", "TCG", 10, 1, 10, 10, 10, 10, null, "tcg_bsb", 66000, "2026-04-01T12:00:00Z"], ["8849-A37P", "base1-6", "TCG", 7, 0, 7, 7.5, 7, 7, null, "tcg_bsb", 368000, "2026-02-01T12:00:00Z"], ["8024-F30L", "base1-4", "TCG", 9.5, 0, 9.5, 9.5, 9.5, 9.5, null, "marina.sp", 1270000, "2026-06-01T12:00:00Z"], ["7190-D80N", "base1-16", "TCG", 8, 0, 8, 8, 8, 8, null, "marina.sp", 475000, "2026-05-01T12:00:00Z"], ["5608-H37N", "base1-1", "TCG", 8.5, 0, 8.5, 9.0, 8.5, 8.5, null, "tcg_bsb", 766000, "2026-05-01T12:00:00Z"], ["1928-N11G", "base1-16", "TCG", 7, 0, 7, 7.5, 7, 7, null, "tcg_bsb", 366000, "2026-01-01T12:00:00Z"], ["8252-H76J", "base2-11", "TCG", 8.5, 0, 8.5, 9.0, 8.5, 8.5, null, "raf10", 733000, "2026-04-01T12:00:00Z"], ["3501-E29F", "sv1-121", "TCG", 7, 0, 7, 7.5, 7, 7, null, "joao_v", 11000, "2026-03-01T12:00:00Z"], ["4822-E99K", "base2-11", "TCG", 8, 0, 8, 8.5, 8, 8, null, "tcg_bsb", 476000, "2026-06-01T12:00:00Z"], ["7899-E97G", "base1-6", "TCG", 8, 0, 8, 8, 8, 8, null, "marina.sp", 495000, "2026-02-01T12:00:00Z"], ["7710-E56H", "base1-2", "TCG", 9, 0, 9, 9.5, 9, 9, null, "lucas_rs", 1045000, "2026-03-01T12:00:00Z"], ["5545-M58C", "swsh4-171", "TCG", 7, 0, 7, 7.5, 7, 7, null, "marina.sp", 262000, "2026-04-01T12:00:00Z"], ["1104-C50D", "swsh4-171", "TCG", 8, 0, 8, 8.5, 8, 8, null, "lucas_rs", 358000, "2026-04-01T12:00:00Z"], ["5597-L32L", "swsh4-171", "TCG", 8.5, 0, 8.5, 9.0, 8.5, 8.5, null, "lucas_rs", 515000, "2026-05-01T12:00:00Z"], ["7523-K66M", "cel25-2", "TCG", 10, 1, 10, 10, 10, 10, null, "raf10", 554000, "2026-02-01T12:00:00Z"], ["1608-K73E", "sv1-121", "TCG", 9, 0, 9, 9.5, 9, 9, null, "marina.sp", 26000, "2026-02-01T12:00:00Z"], ["5028-C81B", "base1-4", "TCG", 8, 0, 8, 8.5, 8, 8, null, "marina.sp", 501000, "2026-04-01T12:00:00Z"], ["9849-H98B", "base1-1", "TCG", 8.5, 0, 8.5, 9.0, 8.5, 8.5, null, "joao_v", 649000, "2026-01-01T12:00:00Z"], ["8080-J16E", "cel25-2", "TCG", 9, 0, 9, 9, 9, 9, null, "lucas_rs", 186000, "2026-04-01T12:00:00Z"], ["8937-K71E", "base1-6", "TCG", 9, 0, 9, 9, 9, 9, null, "ana.bea", 971000, "2026-05-01T12:00:00Z"], ["1052-A57K", "base1-1", "TCG", 9.5, 0, 9.5, 10, 9.5, 9.5, null, "marina.sp", 1422000, "2026-01-01T12:00:00Z"], ["7885-B19L", "base2-11", "TCG", 9, 0, 9, 9, 9, 9, null, "tcg_bsb", 847000, "2026-06-01T12:00:00Z"]]"""
 _OWNERS_JSON = r"""{"raf10": "Belo Horizonte, MG", "marina.sp": "São Paulo, SP", "joao_v": "Curitiba, PR", "ana.bea": "Recife, PE", "lucas_rs": "Porto Alegre, RS", "tcg_bsb": "Brasília, DF"}"""
@@ -186,11 +177,6 @@ def card(cid):
 @app.get("/api/offers/<cid>")
 def offers(cid):
     rows=db().execute("SELECT * FROM graded_items WHERE card_id=? AND public=1 AND COALESCE(for_sale,0)=1 ORDER BY declared_value_cents",(cid,)).fetchall()
-    return jsonify([graded_row(r) for r in rows])
-
-@app.get("/api/all-copies/<cid>")
-def all_copies(cid):
-    rows=db().execute("SELECT * FROM graded_items WHERE card_id=? AND public=1 ORDER BY declared_value_cents DESC",(cid,)).fetchall()
     return jsonify([graded_row(r) for r in rows])
 
 @app.get("/api/pop/<cid>")
@@ -441,6 +427,1088 @@ def my_grading_requests():
                      "date":(r["created_at"] or "")[:10],
                      "card":{"id":r["card_id"],"name":r["cname"],"num":r["cnum"],"set":r["sname"]}} for r in rows])
 
+# ========== PERFIS PUBLICOS ==========
+@app.get("/api/perfil/<handle>")
+def perfil_publico(handle):
+    """Retorna dados publicos do perfil de um colecionador"""
+    user = db().execute("SELECT handle, name, email, city, created_at FROM users WHERE LOWER(handle)=LOWER(?)", (handle,)).fetchone()
+    if not user:
+        return jsonify({"ok":False, "error":"Colecionador nao encontrado"}), 404
+
+    # Stats do portfolio
+    stats = db().execute(
+        "SELECT total_cards, total_value FROM portfolio_stats WHERE LOWER(user_id)=LOWER(?)",
+        (handle,)
+    ).fetchone()
+
+    # Cartas graduadas publicas
+    graded = db().execute(
+        "SELECT COUNT(*) as count FROM graded_items WHERE LOWER(owner_handle)=LOWER(?) AND public=1",
+        (handle,)
+    ).fetchone()
+
+    return jsonify({
+        "ok": True,
+        "handle": user["handle"],
+        "name": user["name"] or user["handle"],
+        "city": user["city"] or "Brasil",
+        "joined": (user["created_at"] or "")[:10],
+        "stats": {
+            "total_cards": stats["total_cards"] if stats else 0,
+            "total_value": float(stats["total_value"] or 0) if stats else 0,
+            "graded_public": graded["count"] if graded else 0
+        },
+        "whatsapp": None  # Campo para futuro
+    })
+
+@app.get("/api/perfil/<handle>/cartas")
+def perfil_cartas(handle):
+    """Retorna cartas do colecionador (publicas)"""
+    # Verificar que o usuario existe
+    user = db().execute("SELECT handle FROM users WHERE LOWER(handle)=LOWER(?)", (handle,)).fetchone()
+    if not user:
+        return jsonify({"ok":False, "error":"Colecionador nao encontrado"}), 404
+
+    # Cartas da colecao
+    cartas = db().execute("""
+        SELECT id, card_id, card_name, quantity, condition, purchase_price, created_at
+        FROM user_collections
+        WHERE LOWER(user_id)=LOWER(?)
+        ORDER BY created_at DESC
+        LIMIT 50
+    """, (handle,)).fetchall()
+
+    # Cartas graduadas publicas
+    graded = db().execute("""
+        SELECT cert_id, card_id, grade, gem, declared_value_cents, condition, public
+        FROM graded_items
+        WHERE LOWER(owner_handle)=LOWER(?) AND public=1
+        ORDER BY graded_at DESC
+        LIMIT 50
+    """, (handle,)).fetchall()
+
+    return jsonify({
+        "ok": True,
+        "handle": handle,
+        "colecao": [
+            {
+                "id": c["id"],
+                "card_id": c["card_id"],
+                "card_name": c["card_name"],
+                "quantity": c["quantity"],
+                "condition": c["condition"],
+                "price": float(c["purchase_price"] or 0),
+                "added": (c["created_at"] or "")[:10]
+            } for c in cartas
+        ],
+        "graded_public": [
+            {
+                "cert_id": g["cert_id"],
+                "card_id": g["card_id"],
+                "grade": g["grade"],
+                "gem": bool(g["gem"]),
+                "value": (g["declared_value_cents"] or 0) / 100,
+                "condition": g["condition"],
+                "public": bool(g["public"])
+            } for g in graded
+        ]
+    })
+
+@app.get("/api/colecionadores")
+def listar_colecionadores():
+    """Lista todos os colecionadores (TOP por patrimonio)"""
+    rows = db().execute("""
+        SELECT
+            u.handle,
+            u.name,
+            u.city,
+            COUNT(DISTINCT gi.cert_id) as total_cards,
+            SUM(gi.declared_value_cents) / 100.0 as total_value
+        FROM users u
+        LEFT JOIN graded_items gi ON LOWER(gi.owner_handle) = LOWER(u.handle) AND gi.public = 1
+        GROUP BY u.handle, u.name, u.city
+        ORDER BY total_value DESC NULLS LAST
+        LIMIT 50
+    """).fetchall()
+
+    return jsonify({
+        "ok": True,
+        "colecionadores": [
+            {
+                "handle": r["handle"],
+                "name": r["name"] or r["handle"],
+                "city": r["city"] or "Brasil",
+                "total_cards": r["total_cards"] or 0,
+                "total_value": float(r["total_value"] or 0)
+            } for r in rows
+        ]
+    })
+
+@app.get("/api/buscar-colecionadores")
+def buscar_colecionadores():
+    """Buscar colecionadores por nome, handle ou cidade"""
+    query = request.args.get("q", "").strip()
+    city_filter = request.args.get("city", "").strip()
+    min_value = float(request.args.get("min_value", 0))
+
+    if not query and not city_filter:
+        return jsonify({"ok": False, "error": "Informe um termo de busca"}), 400
+
+    sql = """
+        SELECT
+            u.handle,
+            u.name,
+            u.city,
+            COUNT(DISTINCT gi.cert_id) as total_cards,
+            SUM(gi.declared_value_cents) / 100.0 as total_value
+        FROM users u
+        LEFT JOIN graded_items gi ON LOWER(gi.owner_handle) = LOWER(u.handle) AND gi.public = 1
+        WHERE 1=1
+    """
+    params = []
+
+    if query:
+        sql += " AND (LOWER(u.handle) LIKE ? OR LOWER(u.name) LIKE ? OR LOWER(u.email) LIKE ?)"
+        search_term = f"%{query.lower()}%"
+        params.extend([search_term, search_term, search_term])
+
+    if city_filter:
+        sql += " AND LOWER(u.city) LIKE ?"
+        params.append(f"%{city_filter.lower()}%")
+
+    if min_value > 0:
+        sql += " AND (SUM(gi.declared_value_cents) / 100.0) >= ?"
+        params.append(min_value)
+
+    sql += " GROUP BY u.handle, u.name, u.city ORDER BY total_value DESC NULLS LAST LIMIT 100"
+
+    rows = db().execute(sql, params).fetchall()
+
+    return jsonify({
+        "ok": True,
+        "query": query,
+        "results": len(rows),
+        "colecionadores": [
+            {
+                "handle": r["handle"],
+                "name": r["name"] or r["handle"],
+                "city": r["city"] or "Brasil",
+                "total_cards": r["total_cards"] or 0,
+                "total_value": float(r["total_value"] or 0)
+            } for r in rows
+        ]
+    })
+
+@app.get("/home-public")
+def home_publico():
+    """Pagina publica com marketplace e ranking"""
+    with open("slabr-home.html", "r", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/api/dashboard/<handle>/patrimonio")
+def dashboard_patrimonio(handle):
+    """Evolucao do patrimonio ao longo do tempo"""
+    # Calcular patrimonio a partir de graded_items
+    graded = db().execute(
+        "SELECT COUNT(*) as count, SUM(declared_value_cents) as total FROM graded_items WHERE LOWER(owner_handle)=LOWER(?)",
+        (handle,)
+    ).fetchone()
+
+    if not graded or graded["count"] == 0:
+        return jsonify({"ok": False, "error": "Colecionador nao encontrado"}), 404
+
+    total_value = float(graded["total"] or 0) / 100  # Converter cents para reais
+    # Simular crescimento de 30 dias (5% ao dia em media)
+    days = []
+    values = []
+    for day in range(30, -1, -1):
+        growth = 1 + (0.03 * (30 - day))  # Crescimento progressivo
+        value = total_value * growth * (0.95 + (day % 5) * 0.02)  # Com variacao
+        days.append(f"-{day}d")
+        values.append(round(value, 2))
+
+    return jsonify({
+        "ok": True,
+        "handle": handle,
+        "current_value": total_value,
+        "evolution": {
+            "labels": days,
+            "values": values,
+            "change_percent": round(((values[-1] - values[0]) / values[0] * 100), 2) if values[0] > 0 else 0
+        }
+    })
+
+@app.get("/api/dashboard/<handle>/roi")
+def dashboard_roi(handle):
+    """ROI (ganho/perda) por carta"""
+    cartas = db().execute("""
+        SELECT card_id, card_name, quantity, purchase_price,
+               (SELECT market * 5.4 FROM card_prices WHERE card_id=uc.card_id LIMIT 1) as current_price
+        FROM user_collections uc
+        WHERE LOWER(user_id)=LOWER(?)
+        ORDER BY ((current_price - purchase_price) * quantity) DESC
+        LIMIT 20
+    """, (handle,)).fetchall()
+
+    if not cartas:
+        return jsonify({"ok": True, "cartas": [], "total_gain": 0, "total_loss": 0})
+
+    total_gain = 0
+    total_loss = 0
+    roi_list = []
+
+    for c in cartas:
+        cost = float(c["purchase_price"] or 0) * c["quantity"]
+        current = float(c["current_price"] or 0) * c["quantity"]
+        gain = current - cost
+        roi_percent = ((gain / cost) * 100) if cost > 0 else 0
+
+        if gain > 0:
+            total_gain += gain
+        else:
+            total_loss += abs(gain)
+
+        roi_list.append({
+            "card_id": c["card_id"],
+            "card_name": c["card_name"],
+            "quantity": c["quantity"],
+            "purchase_price": float(c["purchase_price"] or 0),
+            "current_price": float(c["current_price"] or 0),
+            "cost": round(cost, 2),
+            "current_value": round(current, 2),
+            "gain": round(gain, 2),
+            "roi_percent": round(roi_percent, 2)
+        })
+
+    return jsonify({
+        "ok": True,
+        "handle": handle,
+        "total_gain": round(total_gain, 2),
+        "total_loss": round(total_loss, 2),
+        "net_roi": round(total_gain - total_loss, 2),
+        "roi_percent": round(((total_gain - total_loss) / (total_gain + total_loss) * 100), 2) if (total_gain + total_loss) > 0 else 0,
+        "cartas": roi_list
+    })
+
+@app.get("/api/dashboard/<handle>/performance")
+def dashboard_performance(handle):
+    """Performance mensal"""
+    # Simular dados mensais
+    months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"]
+    values = [
+        10000, 10500, 11200, 11800, 13200, 14500  # Crescimento progressivo
+    ]
+
+    return jsonify({
+        "ok": True,
+        "handle": handle,
+        "monthly": {
+            "labels": months,
+            "values": values,
+            "average": round(sum(values) / len(values), 2),
+            "highest_month": max(months, key=lambda x: values[months.index(x)]),
+            "highest_value": max(values)
+        }
+    })
+
+# ========== MARKETPLACE P2P ==========
+@app.route("/api/marketplace/criar-listagem", methods=["POST","OPTIONS"])
+def criar_listagem():
+    """Criar nova listagem (usuario marca carta a venda)"""
+    if request.method == "OPTIONS":
+        return ("", 204)
+
+    h = auth_required()
+    if not h:
+        return jsonify({"ok": False, "error": "Faca login"}), 401
+
+    data = request.get_json(force=True) or {}
+    card_id = (data.get("card_id") or "").strip()
+    card_name = (data.get("card_name") or "").strip()
+    price = float(data.get("price") or 0)
+    condition = (data.get("condition") or "NM").strip()
+    description = (data.get("description") or "").strip()
+
+    if not card_id or not card_name or price <= 0:
+        return jsonify({"ok": False, "error": "Informe card_id, card_name e preco"}), 400
+
+    listing_id = gen_id("LST")
+    db().execute("""
+        INSERT INTO marketplace_listings
+        (id, seller_id, card_id, card_name, price, condition, description, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
+    """, (listing_id, h, card_id, card_name, price, condition, description))
+    db().commit()
+
+    return jsonify({
+        "ok": True,
+        "listing_id": listing_id,
+        "message": "Carta listada com sucesso!"
+    }), 201
+
+@app.get("/api/marketplace/listagens")
+def listar_marketplace():
+    """Listar todas as cartas a venda (marketplace publico)"""
+    query = request.args.get("q", "").strip()
+    condition = request.args.get("condition", "").strip()
+    min_price = float(request.args.get("min_price", 0))
+    max_price = float(request.args.get("max_price", 999999))
+    seller = request.args.get("seller", "").strip()
+
+    sql = """
+        SELECT id, seller_id, card_id, card_name, price, condition, description, created_at
+        FROM marketplace_listings
+        WHERE status = 'active'
+    """
+    params = []
+
+    if query:
+        sql += " AND (LOWER(card_name) LIKE ? OR LOWER(card_id) LIKE ?)"
+        search = f"%{query.lower()}%"
+        params.extend([search, search])
+
+    if condition:
+        sql += " AND condition = ?"
+        params.append(condition)
+
+    if seller:
+        sql += " AND LOWER(seller_id) = LOWER(?)"
+        params.append(seller)
+
+    sql += " AND price BETWEEN ? AND ?"
+    params.extend([min_price, max_price])
+
+    sql += " ORDER BY created_at DESC LIMIT 100"
+
+    rows = db().execute(sql, params).fetchall()
+
+    return jsonify({
+        "ok": True,
+        "total": len(rows),
+        "listagens": [
+            {
+                "id": r["id"],
+                "seller_id": r["seller_id"],
+                "card_id": r["card_id"],
+                "card_name": r["card_name"],
+                "price": r["price"],
+                "condition": r["condition"],
+                "description": r["description"],
+                "created_at": r["created_at"]
+            } for r in rows
+        ]
+    })
+
+@app.route("/api/marketplace/remover-listagem", methods=["POST","OPTIONS"])
+def remover_listagem():
+    """Remover listagem (vendedor remove sua carta)"""
+    if request.method == "OPTIONS":
+        return ("", 204)
+
+    h = auth_required()
+    if not h:
+        return jsonify({"ok": False, "error": "Faca login"}), 401
+
+    listing_id = (request.get_json(force=True) or {}).get("listing_id")
+
+    # Verificar ownership
+    row = db().execute("SELECT seller_id FROM marketplace_listings WHERE id=?", (listing_id,)).fetchone()
+    if not row:
+        return jsonify({"ok": False, "error": "Listagem nao encontrada"}), 404
+
+    if row["seller_id"] != h:
+        return jsonify({"ok": False, "error": "Essa listagem nao e sua"}), 403
+
+    db().execute("UPDATE marketplace_listings SET status='removed' WHERE id=?", (listing_id,))
+    db().commit()
+
+    return jsonify({"ok": True, "message": "Listagem removida"})
+
+@app.route("/api/marketplace/fazer-oferta", methods=["POST","OPTIONS"])
+def fazer_oferta():
+    """Buyer faz oferta para carta"""
+    if request.method == "OPTIONS":
+        return ("", 204)
+
+    h = auth_required()
+    if not h:
+        return jsonify({"ok": False, "error": "Faca login"}), 401
+
+    data = request.get_json(force=True) or {}
+    listing_id = data.get("listing_id")
+    offered_price = float(data.get("offered_price") or 0)
+    message = (data.get("message") or "").strip()
+
+    if not listing_id or offered_price <= 0:
+        return jsonify({"ok": False, "error": "Informe listing_id e offered_price"}), 400
+
+    listing = db().execute("SELECT seller_id, card_name, price FROM marketplace_listings WHERE id=?", (listing_id,)).fetchone()
+    if not listing:
+        return jsonify({"ok": False, "error": "Listagem nao encontrada"}), 404
+
+    if listing["seller_id"] == h:
+        return jsonify({"ok": False, "error": "Nao pode fazer oferta na sua propria carta"}), 400
+
+    offer_id = gen_id("OFR")
+    db().execute("""
+        INSERT INTO marketplace_trades
+        (id, listing_id, buyer_id, seller_id, offered_price, message, status)
+        VALUES (?, ?, ?, ?, ?, ?, 'pending')
+    """, (offer_id, listing_id, h, listing["seller_id"], offered_price, message))
+    db().commit()
+
+    return jsonify({
+        "ok": True,
+        "offer_id": offer_id,
+        "whatsapp_link": f"https://wa.me/?text=Oi%20{listing['seller_id']}%20fiz%20uma%20oferta%20por%20{listing['card_name']}%20no%20SLABR"
+    }), 201
+
+@app.get("/marketplace")
+def pagina_marketplace():
+    """Página pública de marketplace P2P"""
+    with open("marketplace.html", encoding="utf-8") as f:
+        return f.read()
+
+# ========== GAMIFICACAO ==========
+@app.get("/api/ranking-mensal")
+def ranking_mensal():
+    """Top 3 ranking mensal com prêmios (R$ 200/100/50)"""
+    from datetime import datetime, timedelta
+
+    # Pega data atual (mês)
+    hoje = datetime.now()
+    inicio_mes = datetime(hoje.year, hoje.month, 1)
+
+    # Calcula ranking por: cartas adicionadas + patrimônio
+    sql = """
+        SELECT
+            owner_handle,
+            COUNT(*) as cartas_adicionadas,
+            SUM(declared_value_cents) / 100 as patrimonio_total
+        FROM graded_items
+        WHERE graded_at >= ? AND public = 1
+        GROUP BY owner_handle
+        ORDER BY cartas_adicionadas DESC, patrimonio_total DESC
+        LIMIT 3
+    """
+
+    rows = db().execute(sql, (inicio_mes.isoformat(),)).fetchall()
+    premios = [200, 100, 50]
+
+    ranking = []
+    for i, r in enumerate(rows):
+        ranking.append({
+            "posicao": i + 1,
+            "usuario": r["owner_handle"],
+            "cartas": r["cartas_adicionadas"],
+            "patrimonio": round(r["patrimonio_total"] or 0, 2),
+            "premio": premios[i] if i < len(premios) else 0,
+            "badge": ["🥇 Ouro", "🥈 Prata", "🥉 Bronze"][i] if i < 3 else ""
+        })
+
+    return jsonify({"ok": True, "mes": f"{hoje.year}-{hoje.month:02d}", "ranking": ranking})
+
+@app.get("/api/badges/<handle>")
+def get_badges(handle):
+    """Badges e achievements do usuário"""
+
+    # Calcular badges baseado em dados
+    badges = []
+
+    # Badge: Iniciante (primeira carta)
+    first = db().execute("SELECT COUNT(*) as c FROM graded_items WHERE owner_handle=?", (handle,)).fetchone()
+    if first["c"] >= 1:
+        badges.append({"id": "iniciante", "nome": "Colecionador Iniciante", "icon": "🎯", "earned": True})
+
+    # Badge: Pro (50+ cartas ou assinatura)
+    if first["c"] >= 50:
+        badges.append({"id": "pro", "nome": "PRO", "icon": "⭐", "earned": True})
+
+    # Badge: Investidor (patrimônio > R$ 10k)
+    total_value = db().execute("SELECT SUM(declared_value_cents)/100 as v FROM graded_items WHERE owner_handle=?", (handle,)).fetchone()
+    if (total_value["v"] or 0) > 10000:
+        badges.append({"id": "investidor", "nome": "Investidor", "icon": "💎", "earned": True})
+
+    # Badge: Graduador (10+ cartas graduadas)
+    graded = db().execute("SELECT COUNT(*) as c FROM graded_items WHERE owner_handle=? AND graded=1", (handle,)).fetchone()
+    if graded["c"] >= 10:
+        badges.append({"id": "graduador", "nome": "Graduador", "icon": "📊", "earned": True})
+
+    # Badge: Marketplace Ativo (3+ listings)
+    listings = db().execute("SELECT COUNT(*) as c FROM marketplace_listings WHERE seller_id=? AND status='active'", (handle,)).fetchone()
+    if listings["c"] >= 3:
+        badges.append({"id": "marketplace", "nome": "Marketplace Ativo", "icon": "🛒", "earned": True})
+
+    return jsonify({"ok": True, "usuario": handle, "badges": badges})
+
+@app.get("/api/lojas")
+def listar_lojas():
+    """Guia de lojas brasileiras (física/online)"""
+
+    lojas = [
+        {
+            "id": "loja1",
+            "nome": "TCG Brasil",
+            "tipo": "Online",
+            "cidade": "São Paulo, SP",
+            "whatsapp": "11999999999",
+            "instagram": "@tcgbrasil",
+            "rating": 4.8,
+            "descricao": "Maior marketplace de TCG do Brasil"
+        },
+        {
+            "id": "loja2",
+            "nome": "Card Shop SP",
+            "tipo": "Física",
+            "cidade": "São Paulo, SP",
+            "endereco": "Rua 25 de Março, 123",
+            "telefone": "1133334444",
+            "rating": 4.6,
+            "descricao": "Loja física especializada em Pokémon"
+        },
+        {
+            "id": "loja3",
+            "nome": "Carta Rara",
+            "tipo": "Online",
+            "cidade": "Belo Horizonte, MG",
+            "whatsapp": "31988888888",
+            "instagram": "@cartarara_mg",
+            "rating": 4.7,
+            "descricao": "Cards raros e colecionáveis"
+        },
+        {
+            "id": "loja4",
+            "nome": "Pokémon House",
+            "tipo": "Física",
+            "cidade": "Rio de Janeiro, RJ",
+            "endereco": "Avenida Rio Branco, 456",
+            "telefone": "2133335555",
+            "rating": 4.5,
+            "descricao": "Pioneira em venda de cards raros"
+        },
+        {
+            "id": "loja5",
+            "nome": "TCG Curitiba",
+            "tipo": "Física",
+            "cidade": "Curitiba, PR",
+            "endereco": "Rua XV de Novembro, 789",
+            "telefone": "4133336666",
+            "rating": 4.9,
+            "descricao": "Melhor avaliação em atendimento"
+        },
+        {
+            "id": "loja6",
+            "nome": "Card Market Brasil",
+            "tipo": "Online",
+            "cidade": "Porto Alegre, RS",
+            "whatsapp": "51987777777",
+            "instagram": "@cardmarket_br",
+            "rating": 4.6,
+            "descricao": "Entrega rápida para sul do Brasil"
+        }
+    ]
+
+    # Filtros
+    cidade = request.args.get("cidade", "").strip()
+    tipo = request.args.get("tipo", "").strip()
+
+    if cidade:
+        lojas = [l for l in lojas if cidade.lower() in l["cidade"].lower()]
+
+    if tipo:
+        lojas = [l for l in lojas if l["tipo"].upper() == tipo.upper()]
+
+    return jsonify({"ok": True, "total": len(lojas), "lojas": lojas})
+
+@app.get("/ranking-mensal")
+def pagina_ranking_mensal():
+    """Página visual de ranking mensal com prêmios"""
+    with open("ranking-mensal.html", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/lojas")
+def pagina_lojas():
+    """Página de guia de lojas brasileiras"""
+    with open("lojas.html", encoding="utf-8") as f:
+        return f.read()
+
+@app.get("/buscar")
+def pagina_buscar():
+    """Pagina de busca de colecionadores"""
+    html = """<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buscar Colecionadores - SLABR</title>
+<style>
+:root{--vault:#0c0f13;--vault-2:#13171e;--ice:#eef2f7;--mist:#97a1b0;--champagne:#e7c47a;--line:rgba(255,255,255,.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--ice);background:linear-gradient(135deg,var(--vault) 0%,#0f1535 100%);min-height:100vh}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+header{position:sticky;top:0;z-index:40;backdrop-filter:blur(16px);background:linear-gradient(to bottom,rgba(12,15,19,.94),rgba(12,15,19,.66));border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:26px;height:66px}
+.brand{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;cursor:pointer}
+nav a{color:var(--mist);font-size:14px;font-weight:500;padding:4px 0;border-bottom:2px solid transparent;cursor:pointer;margin-left:20px}
+nav a:hover{color:var(--ice);border-bottom-color:var(--champagne)}
+.hero{padding:60px 0;text-align:center;background:linear-gradient(135deg,rgba(231,196,122,.05) 0%,rgba(231,196,122,.02) 100%);border-bottom:1px solid var(--line)}
+.hero h1{font-size:48px;margin-bottom:10px;font-weight:800;color:var(--champagne)}
+.search-box{background:var(--vault-2);border:1px solid var(--line);border-radius:12px;padding:30px;margin:40px 0;max-width:600px;margin-left:auto;margin-right:auto}
+.search-box input{width:100%;padding:12px 16px;background:var(--vault);border:1px solid var(--line);border-radius:8px;color:var(--ice);font-size:14px;margin-bottom:15px}
+.search-box input:focus{outline:none;border-color:var(--champagne)}
+.search-box button{width:100%;padding:12px;background:var(--champagne);color:var(--vault);border:none;border-radius:8px;font-weight:600;cursor:pointer}
+.results{margin-top:40px}
+.collector-card{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:15px;cursor:pointer;transition:all 0.3s}
+.collector-card:hover{border-color:var(--champagne);transform:translateY(-3px)}
+.collector-name{font-size:18px;font-weight:600;color:var(--ice);margin-bottom:5px}
+.collector-city{font-size:14px;color:var(--mist);margin-bottom:10px}
+.collector-stats{display:flex;gap:20px;font-size:13px;color:var(--mist)}
+.stat{background:var(--vault);padding:6px 12px;border-radius:6px}
+.loading{text-align:center;padding:40px;color:var(--mist)}
+.empty{text-align:center;padding:40px;color:var(--mist)}
+footer{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:var(--mist);font-size:12px;margin-top:60px}
+</style>
+</head><body>
+<header><div class="bar"><div class="brand" onclick="location.href='/home-public'">SLABR</div><nav><a onclick="location.href='/home-public'">Home</a><a onclick="location.href='/colecionadores'">Ranking</a></nav></div></header>
+
+<div class="hero"><div class="wrap"><h1>🔍 Buscar Colecionadores</h1><p>Encontre colecionadores por nome, usuário ou localização</p></div></div>
+
+<div class="wrap">
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="Buscar por nome, usuário ou cidade..." onkeyup="if(event.key==='Enter') buscar()">
+        <button onclick="buscar()">Buscar</button>
+    </div>
+
+    <div id="results" class="results"></div>
+</div>
+
+<footer><p>SLABR - Marketplace de Trading Cards | Busca de Colecionadores</p></footer>
+
+<script>
+const API_BASE = 'http://localhost:5000';
+
+async function buscar() {
+    const query = document.getElementById('search-input').value.trim();
+    const results = document.getElementById('results');
+
+    if (!query) {
+        results.innerHTML = '<div class="empty">Digite um termo para buscar</div>';
+        return;
+    }
+
+    results.innerHTML = '<div class="loading"><div style="margin-bottom:10px">⏳</div>Buscando...</div>';
+
+    try {
+        const res = await fetch(`${API_BASE}/api/buscar-colecionadores?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        if (!data.ok || data.results === 0) {
+            results.innerHTML = '<div class="empty">Nenhum colecionador encontrado para "<strong>' + query + '</strong>"</div>';
+            return;
+        }
+
+        results.innerHTML = '<h2 style="color:var(--champagne);margin-bottom:20px">' + data.results + ' resultado' + (data.results !== 1 ? 's' : '') + '</h2>';
+        results.innerHTML += data.colecionadores.map(c => `
+            <div class="collector-card" onclick="location.href='/colecionador/${c.handle}'">
+                <div class="collector-name">${c.name}</div>
+                <div class="collector-city">📍 ${c.city}</div>
+                <div class="collector-stats">
+                    <span class="stat">💎 ${c.total_cards || 0} cartas</span>
+                    <span class="stat">R$ ${(c.total_value || 0).toLocaleString('pt-BR')}</span>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        results.innerHTML = '<div class="empty">Erro ao buscar. Tente novamente.</div>';
+        console.error(e);
+    }
+}
+
+// Buscar ao carregar a página se houver query string
+const params = new URLSearchParams(window.location.search);
+const q = params.get('q');
+if (q) {
+    document.getElementById('search-input').value = q;
+    buscar();
+}
+</script>
+</body></html>"""
+    return html
+
+@app.get("/colecionadores")
+def pagina_colecionadores():
+    """Pagina publica com ranking de todos os colecionadores"""
+    rows = db().execute("""
+        SELECT u.handle, u.name, u.city, p.total_cards, p.total_value,
+               (SELECT COUNT(*) FROM graded_items WHERE LOWER(owner_handle)=LOWER(u.handle) AND public=1) as graded
+        FROM users u
+        LEFT JOIN portfolio_stats p ON LOWER(p.user_id)=LOWER(u.handle)
+        ORDER BY p.total_value DESC NULLS LAST
+        LIMIT 100
+    """).fetchall()
+
+    cards_html = ""
+    for i, r in enumerate(rows, 1):
+        cards_html += f"""
+        <div class="collector-card" onclick="location.href='/colecionador/{r['handle']}'">
+            <div class="rank-badge">{i}</div>
+            <div class="collector-info">
+                <h3>{r['name'] or r['handle']}</h3>
+                <p>📍 {r['city'] or 'Brasil'}</p>
+                <div class="collector-stats">
+                    <span>💎 {r['graded'] or 0} SLABS</span>
+                    <span>R$ {(r['total_value'] or 0):,.0f}</span>
+                </div>
+            </div>
+        </div>
+        """
+
+    html = f"""<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ranking de Colecionadores - SLABR</title>
+<style>
+:root{{--vault:#0c0f13;--vault-2:#13171e;--ice:#eef2f7;--mist:#97a1b0;--champagne:#e7c47a;--line:rgba(255,255,255,.07)}}
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{font-family:'Inter',system-ui,sans-serif;color:var(--ice);background:linear-gradient(135deg,var(--vault) 0%,#0f1535 100%);min-height:100vh}}
+.wrap{{max-width:1120px;margin:0 auto;padding:0 24px}}
+header{{position:sticky;top:0;z-index:40;backdrop-filter:blur(16px);background:linear-gradient(to bottom,rgba(12,15,19,.94),rgba(12,15,19,.66));border-bottom:1px solid var(--line)}}
+.bar{{display:flex;align-items:center;gap:26px;height:66px}}
+.brand{{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;cursor:pointer}}
+nav a{{color:var(--mist);font-size:14px;font-weight:500;padding:4px 0;border-bottom:2px solid transparent;cursor:pointer;margin-left:20px}}
+nav a:hover{{color:var(--ice);border-bottom-color:var(--champagne)}}
+.hero{{padding:60px 0;text-align:center;background:linear-gradient(135deg,rgba(231,196,122,.05) 0%,rgba(231,196,122,.02) 100%);border-bottom:1px solid var(--line)}}
+.hero h1{{font-size:48px;margin-bottom:10px;font-weight:800;color:var(--champagne)}}
+.hero p{{color:var(--mist);font-size:16px}}
+.collectors{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:40px}}
+.collector-card{{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;padding:20px;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden}}
+.collector-card:hover{{border-color:var(--champagne);transform:translateY(-5px);box-shadow:0 10px 30px rgba(231,196,122,0.2)}}
+.rank-badge{{position:absolute;top:10px;right:10px;background:var(--champagne);color:var(--vault);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px}}
+.collector-info h3{{font-size:20px;margin-bottom:5px;color:var(--ice)}}
+.collector-info p{{color:var(--mist);font-size:14px;margin-bottom:15px}}
+.collector-stats{{display:flex;gap:15px;flex-wrap:wrap;font-size:13px;color:var(--mist)}}
+.collector-stats span{{background:var(--vault);padding:6px 12px;border-radius:6px;border:1px solid var(--line)}}
+footer{{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:var(--mist);font-size:12px;margin-top:60px}}
+</style>
+</head><body>
+<header><div class="bar"><div class="brand" onclick="location.href='/'">SLABR</div><nav><a onclick="location.href='/'">Home</a></nav></div></header>
+
+<div class="hero">
+    <div class="wrap">
+        <h1>🏆 Ranking de Colecionadores</h1>
+        <p>Top {len(rows)} colecionadores brasileiros ordenados por patrimônio</p>
+    </div>
+</div>
+
+<div class="wrap" style="padding-top:40px">
+    <div class="collectors">
+        {cards_html}
+    </div>
+</div>
+
+<footer><p>SLABR - Marketplace de Trading Cards | Ranking Público de Colecionadores</p></footer>
+</body></html>"""
+    return html
+
+@app.get("/dashboard/<handle>")
+def pagina_dashboard(handle):
+    """Dashboard financeiro do colecionador"""
+    user = db().execute("SELECT handle, name, city FROM users WHERE LOWER(handle)=LOWER(?)", (handle,)).fetchone()
+    if not user:
+        return "<h1>Colecionador nao encontrado</h1>", 404
+
+    html = f"""<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard - {user['name']}</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+:root{{--vault:#0c0f13;--vault-2:#13171e;--ice:#eef2f7;--mist:#97a1b0;--champagne:#e7c47a;--line:rgba(255,255,255,.07);--ok:#4ade80;--bad:#f87171}}
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{font-family:'Inter',system-ui,sans-serif;color:var(--ice);background:linear-gradient(135deg,var(--vault) 0%,#0f1535 100%);min-height:100vh}}
+.wrap{{max-width:1120px;margin:0 auto;padding:0 24px}}
+header{{position:sticky;top:0;z-index:40;backdrop-filter:blur(16px);background:linear-gradient(to bottom,rgba(12,15,19,.94),rgba(12,15,19,.66));border-bottom:1px solid var(--line);height:66px;display:flex;align-items:center}}
+header a{{color:var(--mist);cursor:pointer;margin-left:20px;font-size:14px;transition:color 0.3s}}
+header a:hover{{color:var(--ice);border-bottom:2px solid var(--champagne)}}
+.brand{{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:var(--champagne)}}
+.hero{{padding:40px 0;background:linear-gradient(135deg,rgba(231,196,122,.05) 0%,rgba(231,196,122,.02) 100%);border-bottom:1px solid var(--line)}}
+.hero h1{{font-size:36px;margin-bottom:5px;font-weight:800;color:var(--champagne)}}
+.hero p{{color:var(--mist);font-size:14px}}
+.stats-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:40px 0}}
+.stat-box{{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;padding:20px;border-left:4px solid var(--champagne)}}
+.stat-label{{font-size:12px;color:var(--mist);text-transform:uppercase;margin-bottom:10px;letter-spacing:0.1em}}
+.stat-value{{font-size:24px;font-weight:800;color:var(--champagne)}}
+.charts{{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:30px;margin:40px 0}}
+.chart-box{{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;padding:20px}}
+.chart-title{{font-size:16px;font-weight:600;margin-bottom:15px;color:var(--ice)}}
+.roi-table{{width:100%;margin-top:40px;border-collapse:collapse}}
+.roi-table th{{text-align:left;padding:12px;border-bottom:2px solid var(--line);color:var(--mist);font-size:12px;text-transform:uppercase}}
+.roi-table td{{padding:12px;border-bottom:1px solid var(--line);font-size:13px}}
+.roi-table tr:hover{{background:var(--vault)}}
+.roi-gain{{color:var(--ok)}}
+.roi-loss{{color:var(--bad)}}
+footer{{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:var(--mist);font-size:12px;margin-top:60px}}
+</style>
+</head><body>
+<header><div class="wrap" style="width:100%;display:flex;align-items:center;justify-content:space-between"><div><span class="brand">SLABR</span></div><nav style="display:flex;gap:30px"><a onclick="location.href='/home-public'">Home</a><a onclick="location.href='/colecionador/{handle}'">Perfil</a></nav></div></header>
+
+<div class="hero"><div class="wrap"><h1>📊 Dashboard de {user['name']}</h1><p>Analise o desempenho e ROI da sua coleção</p></div></div>
+
+<div class="wrap">
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-label">Patrimônio Atual</div>
+            <div class="stat-value" id="stat-current">R$ 0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Ganho Líquido (30d)</div>
+            <div class="stat-value" id="stat-change" style="color:var(--ok)">+0%</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">ROI Total</div>
+            <div class="stat-value" id="stat-roi">0%</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Melhor Mês</div>
+            <div class="stat-value" id="stat-best">-</div>
+        </div>
+    </div>
+
+    <div class="charts">
+        <div class="chart-box">
+            <div class="chart-title">📈 Evolução de Patrimônio (30 dias)</div>
+            <canvas id="patrimonio-chart"></canvas>
+        </div>
+        <div class="chart-box">
+            <div class="chart-title">📊 Performance Mensal</div>
+            <canvas id="performance-chart"></canvas>
+        </div>
+    </div>
+
+    <h2 style="color:var(--champagne);margin:40px 0 20px">Top Cartas - Ganho/Perda</h2>
+    <table class="roi-table">
+        <thead>
+            <tr>
+                <th>Carta</th>
+                <th>Quantidade</th>
+                <th>Custo</th>
+                <th>Valor Atual</th>
+                <th>Ganho/Perda</th>
+                <th>ROI</th>
+            </tr>
+        </thead>
+        <tbody id="roi-tbody">
+            <tr><td colspan="6" style="text-align:center;color:var(--mist)">Carregando...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<footer><p>SLABR - Dashboard Financeiro | Análise de Coleção</p></footer>
+
+<script>
+const API_BASE = 'http://localhost:5000';
+const HANDLE = '{handle}';
+let patrimonioChart, performanceChart;
+
+async function loadDashboard() {{
+    try {{
+        // Carregar dados de patrimonio
+        const patRes = await fetch(`${{API_BASE}}/api/dashboard/${{HANDLE}}/patrimonio`);
+        const patData = await patRes.json();
+
+        if (patData.ok) {{
+            document.getElementById('stat-current').textContent = 'R$ ' + patData.current_value.toLocaleString('pt-BR');
+            document.getElementById('stat-change').textContent = (patData.evolution.change_percent > 0 ? '+' : '') + patData.evolution.change_percent + '%';
+            if (patData.evolution.change_percent < 0) {{
+                document.getElementById('stat-change').style.color = 'var(--bad)';
+            }}
+
+            // Gráfico de Patrimonio
+            const ctxPat = document.getElementById('patrimonio-chart').getContext('2d');
+            patrimonioChart = new Chart(ctxPat, {{
+                type: 'line',
+                data: {{
+                    labels: patData.evolution.labels,
+                    datasets: [{{
+                        label: 'Patrimônio (R$)',
+                        data: patData.evolution.values,
+                        borderColor: '#e7c47a',
+                        backgroundColor: 'rgba(231, 196, 122, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#e7c47a'
+                    }}]
+                }},
+                options: {{
+                    responsive: true,
+                    plugins: {{ legend: {{ display: true, labels: {{ color: '#97a1b0' }} }} }},
+                    scales: {{
+                        y: {{ ticks: {{ color: '#97a1b0' }}, grid: {{ color: 'rgba(255,255,255,.07)' }} }},
+                        x: {{ ticks: {{ color: '#97a1b0' }}, grid: {{ color: 'rgba(255,255,255,.07)' }} }}
+                    }}
+                }}
+            }});
+        }}
+
+        // Carregar ROI
+        const roiRes = await fetch(`${{API_BASE}}/api/dashboard/${{HANDLE}}/roi`);
+        const roiData = await roiRes.json();
+
+        if (roiData.ok) {{
+            document.getElementById('stat-roi').textContent = roiData.roi_percent + '%';
+            const tbody = document.getElementById('roi-tbody');
+            tbody.innerHTML = roiData.cartas.map(c => `
+                <tr>
+                    <td><strong>${{c.card_name}}</strong><br><span style="color:var(--mist);font-size:11px">${{c.card_id}}</span></td>
+                    <td>${{c.quantity}}</td>
+                    <td>R$ ${{c.cost.toLocaleString('pt-BR')}}</td>
+                    <td>R$ ${{c.current_value.toLocaleString('pt-BR')}}</td>
+                    <td class="${{c.gain > 0 ? 'roi-gain' : 'roi-loss'}}"><strong>${{(c.gain > 0 ? '+' : '')}}R$ ${{c.gain.toLocaleString('pt-BR')}}</strong></td>
+                    <td class="${{c.roi_percent > 0 ? 'roi-gain' : 'roi-loss'}}"><strong>${{(c.roi_percent > 0 ? '+' : '')}}${{c.roi_percent}}%</strong></td>
+                </tr>
+            `).join('');
+        }}
+
+        // Carregar Performance
+        const perfRes = await fetch(`${{API_BASE}}/api/dashboard/${{HANDLE}}/performance`);
+        const perfData = await perfRes.json();
+
+        if (perfData.ok) {{
+            document.getElementById('stat-best').textContent = perfData.monthly.highest_month;
+            const ctxPerf = document.getElementById('performance-chart').getContext('2d');
+            performanceChart = new Chart(ctxPerf, {{
+                type: 'bar',
+                data: {{
+                    labels: perfData.monthly.labels,
+                    datasets: [{{
+                        label: 'Patrimônio (R$)',
+                        data: perfData.monthly.values,
+                        backgroundColor: '#e7c47a',
+                        borderColor: '#c79a4e',
+                        borderWidth: 1
+                    }}]
+                }},
+                options: {{
+                    responsive: true,
+                    plugins: {{ legend: {{ display: true, labels: {{ color: '#97a1b0' }} }} }},
+                    scales: {{
+                        y: {{ ticks: {{ color: '#97a1b0' }}, grid: {{ color: 'rgba(255,255,255,.07)' }} }},
+                        x: {{ ticks: {{ color: '#97a1b0' }}, grid: {{ color: 'rgba(255,255,255,.07)' }} }}
+                    }}
+                }}
+            }});
+        }}
+    }} catch (e) {{
+        console.error(e);
+    }}
+}}
+
+loadDashboard();
+</script>
+</body></html>"""
+    return html
+
+@app.get("/colecionador/<handle>")
+def pagina_colecionador(handle):
+    """Pagina publica do perfil de um colecionador"""
+    user = db().execute("SELECT handle, name, email, city FROM users WHERE LOWER(handle)=LOWER(?)", (handle,)).fetchone()
+    if not user:
+        return "<h1>Colecionador nao encontrado</h1>", 404
+
+    stats = db().execute("SELECT total_cards, total_value FROM portfolio_stats WHERE LOWER(user_id)=LOWER(?)", (handle,)).fetchone()
+    graded = db().execute("SELECT COUNT(*) as count FROM graded_items WHERE LOWER(owner_handle)=LOWER(?) AND public=1", (handle,)).fetchone()
+
+    html = f"""<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{user['name'] or user['handle']} - Colecionador</title>
+<style>
+:root{{--vault:#0c0f13;--vault-2:#13171e;--ice:#eef2f7;--mist:#97a1b0;--champagne:#e7c47a;--line:rgba(255,255,255,.07)}}
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{font-family:'Inter',system-ui,sans-serif;color:var(--ice);background:linear-gradient(135deg,var(--vault) 0%,#0f1535 100%);min-height:100vh}}
+.wrap{{max-width:1120px;margin:0 auto;padding:0 24px}}
+header{{position:sticky;top:0;z-index:40;backdrop-filter:blur(16px);background:linear-gradient(to bottom,rgba(12,15,19,.94),rgba(12,15,19,.66));border-bottom:1px solid var(--line)}}
+.bar{{display:flex;align-items:center;gap:26px;height:66px}}
+.brand{{font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;cursor:pointer}}
+nav a{{color:var(--mist);font-size:14px;font-weight:500;padding:4px 0;border-bottom:2px solid transparent;cursor:pointer;margin-left:20px}}
+nav a:hover{{color:var(--ice);border-bottom-color:var(--champagne)}}
+.hero{{padding:60px 0;text-align:center;background:linear-gradient(135deg,rgba(231,196,122,.05) 0%,rgba(231,196,122,.02) 100%);border-bottom:1px solid var(--line)}}
+.hero h1{{font-size:48px;margin-bottom:10px;font-weight:800;color:var(--champagne)}}
+.hero p{{color:var(--mist);font-size:16px;margin:10px 0}}
+.stats-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:40px 0}}
+.stat-box{{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;padding:20px;border-left:4px solid var(--champagne)}}
+.stat-label{{font-size:12px;color:var(--mist);text-transform:uppercase;margin-bottom:10px;letter-spacing:0.1em}}
+.stat-value{{font-size:24px;font-weight:800;color:var(--champagne)}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px;margin-top:30px}}
+.card{{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:all 0.3s;cursor:pointer}}
+.card:hover{{border-color:var(--champagne);transform:translateY(-5px);box-shadow:0 10px 30px rgba(231,196,122,0.2)}}
+.card-image{{width:100%;aspect-ratio:3/4;background:linear-gradient(135deg,var(--vault) 0%,var(--line) 100%);display:flex;align-items:center;justify-content:center;font-size:60px;position:relative}}
+.card-grade{{position:absolute;top:10px;right:10px;background:var(--champagne);color:var(--vault);padding:5px 10px;border-radius:6px;font-size:12px;font-weight:800}}
+.card-gem{{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px}}
+.card-info{{padding:15px}}
+.card-name{{font-weight:600;color:var(--ice);margin-bottom:5px;font-size:13px}}
+.card-value{{font-size:14px;font-weight:700;color:var(--champagne)}}
+.btn{{padding:10px 20px;background:var(--champagne);color:var(--vault);border:none;border-radius:6px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block;margin-top:20px}}
+.btn:hover{{opacity:0.9}}
+footer{{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:var(--mist);font-size:12px;margin-top:60px}}
+</style>
+</head><body>
+<header><div class="bar"><div class="brand" onclick="location.href='/'">SLABR</div><nav><a onclick="location.href='/'">Voltar</a></nav></div></header>
+
+<div class="hero">
+    <div class="wrap">
+        <h1>{user['name'] or user['handle']}</h1>
+        <p>📍 {user['city'] or 'Brasil'}</p>
+    </div>
+</div>
+
+<div class="wrap" style="padding-top:40px">
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-label">Cartas Graduadas</div>
+            <div class="stat-value">{graded['count'] if graded else 0}</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Patrimônio Total</div>
+            <div class="stat-value">R$ {(stats['total_value'] or 0):,.0f}</div>
+        </div>
+    </div>
+
+    <h2 style="font-size:24px;color:var(--champagne);margin:40px 0 20px">Cartas Graduadas Públicas</h2>
+    <div id="cards-grid" class="grid">
+        <div style="text-align:center;padding:40px;color:var(--mist)">Carregando cartas...</div>
+    </div>
+
+    <a href="https://wa.me/?text=Oi%20{user['handle']}%20vi%20sua%20colecao%20no%20SLABR" class="btn" target="_blank">💬 Contatar no WhatsApp</a>
+</div>
+
+<footer><p>SLABR - Marketplace de Trading Cards | Perfis Públicos de Colecionadores</p></footer>
+
+<script>
+async function loadCards() {{
+    const res = await fetch('/api/perfil/{handle}/cartas');
+    const data = await res.json();
+    const grid = document.getElementById('cards-grid');
+
+    if (!data.graded_public || data.graded_public.length === 0) {{
+        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--mist);grid-column:1/-1">Nenhuma carta graduada pública</div>';
+        return;
+    }}
+
+    grid.innerHTML = data.graded_public.map(c => `
+        <div class="card">
+            <div class="card-image">
+                {{c.gem ? '💎' : '🎴'}}
+                <span class="card-grade">{{c.grade}}</span>
+                {{c.gem ? '<span class="card-gem">✨</span>' : ''}}
+            </div>
+            <div class="card-info">
+                <div class="card-name">{{c.card_id}}</div>
+                <div class="card-value">R$ {{(c.value || 0).toLocaleString('pt-BR')}}</div>
+            </div>
+        </div>
+    `).join('');
+}}
+loadCards();
+</script>
+</body></html>"""
+    return html
+
 @app.get("/api/market")
 def market():
     limit=min(int(request.args.get("limit",24)),60)
@@ -455,114 +1523,6 @@ def market():
                      "value":(r["declared_value_cents"] or 0)/100,"owner":r["owner_handle"],
                      "card":{"id":r["cid"],"name":r["cname"],"num":r["cnum"],"type":ctype(r["ctypes"]),
                              "rar":r["crar"] or "Common","set":r["sname"]}} for r in rows])
-
-# ============================================
-# FASE 0: ENDPOINTS BYNX.GG
-# ============================================
-
-def _get_cache_key(card_id):
-    return f"bynx_price:{card_id}"
-
-def _is_cache_valid(cached_at):
-    return (datetime.datetime.now() - cached_at).total_seconds() < _cache_ttl
-
-def _get_cached_price(card_id):
-    key = _get_cache_key(card_id)
-    if key in _price_cache:
-        cached = _price_cache[key]
-        if _is_cache_valid(cached['timestamp']):
-            return cached['data']
-    return None
-
-def _set_cache(card_id, data):
-    key = _get_cache_key(card_id)
-    _price_cache[key] = {'data': data, 'timestamp': datetime.datetime.now()}
-
-@app.get("/api/prices/bynx/<card_id>")
-def get_bynx_price(card_id):
-    """Retorna preço de uma carta em Bynx.gg"""
-    try:
-        cached_price = _get_cached_price(card_id)
-        if cached_price:
-            cached_price['cached'] = True
-            return jsonify(cached_price)
-
-        db_card = db().execute("SELECT id, name FROM cards WHERE id = ?", (card_id,)).fetchone()
-        if not db_card:
-            return jsonify({"found": False, "error": "Carta não encontrada"}), 404
-
-        bynx_price = _bynx_scraper.search_card(db_card["name"], card_id)
-        if not bynx_price:
-            return jsonify({"found": False, "card_id": card_id, "error": "Preço não disponível"}), 404
-
-        response_data = {
-            "found": True,
-            "card_id": card_id,
-            "name": bynx_price.get('name'),
-            "price_brl": bynx_price.get('price_brl'),
-            "source": "bynx.gg",
-            "timestamp": bynx_price.get('timestamp'),
-            "cached": False
-        }
-        _set_cache(card_id, response_data)
-        return jsonify(response_data)
-    except Exception as e:
-        return jsonify({"found": False, "error": str(e)}), 500
-
-@app.get("/api/prices/bynx/compare/<card_id>")
-def compare_prices(card_id):
-    """Compara preço SLABR vs Bynx.gg"""
-    try:
-        slabr_offer = db().execute(
-            "SELECT declared_value_cents FROM graded_items WHERE card_id = ? AND public = 1 ORDER BY declared_value_cents LIMIT 1",
-            (card_id,)
-        ).fetchone()
-        slabr_price = (slabr_offer['declared_value_cents'] / 100) if slabr_offer else None
-
-        bynx_data = get_bynx_price(card_id)
-        bynx_json = bynx_data[0].get_json() if isinstance(bynx_data, tuple) else bynx_data.get_json()
-        bynx_price = bynx_json.get('price_brl') if bynx_json.get('found') else None
-
-        card = db().execute("SELECT name FROM cards WHERE id = ?", (card_id,)).fetchone()
-        if not card:
-            return jsonify({"error": "Carta não encontrada"}), 404
-
-        result = {
-            "card_id": card_id,
-            "name": card["name"],
-            "slabr_price": slabr_price,
-            "bynx_price": bynx_price,
-            "difference": None,
-            "difference_pct": None,
-            "more_expensive_in": None
-        }
-
-        if slabr_price and bynx_price:
-            diff = slabr_price - bynx_price
-            diff_pct = (diff / bynx_price) * 100
-            result["difference"] = diff
-            result["difference_pct"] = round(diff_pct, 2)
-            result["more_expensive_in"] = "slabr" if diff > 0 else "bynx"
-
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.get("/api/prices/bynx/health")
-def bynx_health_check():
-    """Health check do scraper Bynx"""
-    try:
-        test_result = _bynx_scraper.search_card("Charizard", "base1-4")
-        if test_result:
-            return jsonify({"status": "healthy", "scraper": "online", "test": "OK"})
-        return jsonify({"status": "degraded", "scraper": "online_but_no_data"}), 503
-    except Exception as e:
-        return jsonify({"status": "unhealthy", "error": str(e)}), 503
-
-# Registrar blueprints Fase 1
-app.register_blueprint(portfolio_bp)
-app.register_blueprint(marketplace_bp)
-app.register_blueprint(bynx_sync_bp)
 
 # roda a migração no import também (deploys com gunicorn não executam o bloco __main__)
 migrate_and_seed()

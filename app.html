@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLABR - Trading Card Platform</title>
+    <style>
+        :root {
+            --vault: #0c0f13;
+            --vault-2: #13171e;
+            --vault-3: #1a1f28;
+            --ice: #eef2f7;
+            --mist: #97a1b0;
+            --champagne: #e7c47a;
+            --line: rgba(255,255,255,.07);
+            --line-strong: rgba(255,255,255,.14);
+            --ok: #4ade80;
+            --bad: #f87171;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--ice);
+            background: linear-gradient(135deg, var(--vault) 0%, #0f1535 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+        /* HEADER */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            background: linear-gradient(to bottom, rgba(12,15,19,.94), rgba(12,15,19,.66));
+            border-bottom: 1px solid var(--line);
+        }
+
+        .bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 66px;
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--champagne);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        nav {
+            display: flex;
+            gap: 30px;
+            flex: 1;
+            margin-left: 50px;
+        }
+
+        nav a {
+            color: var(--mist);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 4px;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--ice);
+            border-bottom-color: var(--champagne);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-login {
+            padding: 8px 16px;
+            background: var(--champagne);
+            color: var(--vault);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231,196,122,0.3);
+        }
+
+        .user-info {
+            display: none;
+            align-items: center;
+            gap: 15px;
+            color: var(--mist);
+            font-size: 14px;
+        }
+
+        .user-info.visible {
+            display: flex;
+        }
+
+        .btn-logout {
+            padding: 6px 12px;
+            background: var(--bad);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* HERO */
+        .hero {
+            padding: 80px 24px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(231,196,122,.05) 0%, rgba(231,196,122,.02) 100%);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .hero h1 {
+            font-size: clamp(32px, 5vw, 56px);
+            margin-bottom: 20px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .hero h1 em {
+            font-style: normal;
+            color: var(--champagne);
+        }
+
+        .hero p {
+            color: var(--mist);
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* SECTION */
+        .section {
+            padding: 60px 0;
+        }
+
+        .section h2 {
+            font-size: 32px;
+            color: var(--champagne);
+            margin-bottom: 30px;
+            font-weight: 800;
+        }
+
+        .section h3 {
+            font-size: 20px;
+            color: var(--ice);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid var(--champagne);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--mist);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.1em;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--champagne);
+        }
+
+        /* SEARCH */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            max-width: 560px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 15px;
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            color: var(--ice);
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--champagne);
+        }
+
+        .search-btn {
+            padding: 10px 24px;
+            background: var(--champagne);
+            color: var(--vault);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .search-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .card:hover {
+            border-color: var(--champagne);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(231,196,122,0.2);
+        }
+
+        .card-image {
+            width: 100%;
+            aspect-ratio: 3/4;
+            background: linear-gradient(135deg, var(--vault-3) 0%, var(--line) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            position: relative;
+        }
+
+        .card-seller {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(12,15,19,0.8);
+            color: var(--champagne);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .card-rarity {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--champagne);
+            color: var(--vault);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .card-info {
+            padding: 15px;
+        }
+
+        .card-name {
+            font-weight: 600;
+            color: var(--ice);
+            margin-bottom: 5px;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-details {
+            font-size: 12px;
+            color: var(--mist);
+            margin-bottom: 10px;
+        }
+
+        .card-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--champagne);
+        }
+
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            grid-column: 1 / -1;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--line);
+            border-top: 3px solid var(--champagne);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--mist);
+            grid-column: 1 / -1;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--vault-2);
+            border: 1px solid var(--line-strong);
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--champagne);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* LOGIN MODAL */
+        .login-modal {
+            display: none;
+        }
+
+        .login-modal.active {
+            display: flex;
+        }
+
+        .login-box {
+            background: var(--vault-2);
+            border: 1px solid var(--line-strong);
+            border-radius: 10px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+
+        .login-box h2 {
+            color: var(--champagne);
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--mist);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background: var(--vault);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            color: var(--ice);
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--champagne);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 10px;
+            background: var(--champagne);
+            color: var(--vault);
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        /* FOOTER */
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 30px 0;
+            text-align: center;
+            color: var(--mist);
+            font-size: 12px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            nav {
+                gap: 15px;
+                font-size: 12px;
+            }
+
+            .section h2 {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="bar">
+            <div class="brand" onclick="scrollToTop()">🃏 SLABR</div>
+            <nav>
+                <a onclick="scrollTo('marketplace')" class="nav-link active">Explorar</a>
+                <a onclick="scrollTo('trending')" class="nav-link">Tendências</a>
+                <a onclick="scrollTo('about')" class="nav-link">Sobre</a>
+            </nav>
+            <div class="header-actions">
+                <button class="btn-login" id="login-btn" onclick="openLoginModal()">Login</button>
+                <div class="user-info" id="user-info">
+                    <span id="user-display">usuario</span>
+                    <button class="btn-logout" onclick="logout()">Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="wrap">
+            <h1>Bem-vindo ao <em>SLABR</em></h1>
+            <p>A plataforma brasileira para colecionadores de Pokémon. Gerencie sua coleção, acompanhe preços e negocie com segurança.</p>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="container wrap">
+        <!-- HOME - DESTAQUES -->
+        <section class="section">
+            <h2>📊 Sua Coleção em Números</h2>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Cartas Disponíveis</div>
+                    <div class="stat-value" id="stat-cards">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Volume Total</div>
+                    <div class="stat-value" id="stat-volume">R$ 0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Cartas em Tendência</div>
+                    <div class="stat-value" id="stat-trending">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Colecionadores Ativos</div>
+                    <div class="stat-value" id="stat-users">1+</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MARKETPLACE -->
+        <section class="section" id="marketplace">
+            <h2>🛒 Marketplace</h2>
+            <h3>Cartas à venda</h3>
+
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Buscar por nome da carta..." onkeyup="onSearch()">
+                <button class="search-btn" onclick="onSearch()">Buscar</button>
+            </div>
+
+            <div class="grid" id="marketplace-grid">
+                <div class="loading"><div class="spinner"></div>Carregando cartas...</div>
+            </div>
+        </section>
+
+        <!-- TRENDING -->
+        <section class="section" id="trending">
+            <h2>🔥 Em Alta Agora</h2>
+            <h3>Cartas mais procuradas</h3>
+
+            <div class="grid" id="trending-grid">
+                <div class="loading"><div class="spinner"></div>Carregando...</div>
+            </div>
+        </section>
+
+        <!-- ABOUT -->
+        <section class="section" id="about">
+            <h2>ℹ️ Sobre o SLABR</h2>
+
+            <div style="background: var(--vault-2); border: 1px solid var(--line); border-radius: 10px; padding: 30px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px;">Como Funciona</h3>
+                <p style="color: var(--mist); line-height: 1.6; margin-bottom: 15px;">
+                    <strong>SLABR</strong> é a plataforma brasileira para gerenciamento de coleções Pokémon TCG.
+                    Aqui você pode explorar cartas, acompanhar preços em tempo real, verificar tendências do mercado
+                    e conectar com outros colecionadores.
+                </p>
+                <p style="color: var(--mist); line-height: 1.6;">
+                    Nossa missão: Tornab o trading de cards justo, seguro e transparente para todos os brasileiros.
+                </p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">💾 Cartas Catalogadas</div>
+                    <div class="stat-value">22K+</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">📈 Sets Cobertos</div>
+                    <div class="stat-value">240+</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">🌍 Cobertura</div>
+                    <div class="stat-value">Brasil</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">💱 Preços em</div>
+                    <div class="stat-value">R$</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="wrap">
+        <p>SLABR - Trading Card Platform | Plataforma segura para colecionadores brasileiros</p>
+        <p style="margin-top: 15px; font-size: 11px; opacity: 0.7;">Fase 1 ✓ | 46 Endpoints | 18 Tabelas SQLite</p>
+    </footer>
+
+    <!-- MODAL CARD DETAILS -->
+    <div class="modal" id="card-modal">
+        <div class="modal-content" id="modal-content"></div>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+
+    <!-- MODAL LOGIN -->
+    <div class="login-modal" id="login-modal">
+        <div class="login-box">
+            <h2>Login SLABR</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Usuário</label>
+                    <input type="text" id="login-user" placeholder="seu_usuario" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="login-pass" placeholder="senha" required>
+                </div>
+                <button type="submit" class="btn-submit">Entrar</button>
+            </form>
+            <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        let currentUser = null;
+        let allListings = [];
+        let allTrending = [];
+
+        // LOGIN
+        function openLoginModal() {
+            document.getElementById('login-modal').classList.add('active');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.remove('active');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-user').value;
+            currentUser = username;
+            updateAuthUI();
+            closeLoginModal();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('login-user').value = '';
+            document.getElementById('login-pass').value = '';
+            updateAuthUI();
+        }
+
+        function updateAuthUI() {
+            const loginBtn = document.getElementById('login-btn');
+            const userInfo = document.getElementById('user-info');
+
+            if (currentUser) {
+                loginBtn.style.display = 'none';
+                userInfo.classList.add('visible');
+                document.getElementById('user-display').textContent = currentUser;
+            } else {
+                loginBtn.style.display = 'block';
+                userInfo.classList.remove('visible');
+            }
+        }
+
+        // CARDS
+        function renderCard(card) {
+            return `
+                <div class="card" onclick="openModal(${JSON.stringify(card).replace(/"/g, '&quot;')})">
+                    <div class="card-image">
+                        🎴
+                        <span class="card-seller">${card.seller_id || 'Vendedor'}</span>
+                        <span class="card-rarity">${card.condition || 'NM'}</span>
+                    </div>
+                    <div class="card-info">
+                        <div class="card-name">${card.card_name || 'Desconhecida'}</div>
+                        <div class="card-details">${card.card_id || ''}</div>
+                        <div class="card-price">R$ ${parseFloat(card.price || 0).toLocaleString('pt-BR')}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCards(cards, containerId) {
+            const container = document.getElementById(containerId);
+            if (!cards || cards.length === 0) {
+                container.innerHTML = '<div class="empty">Nenhuma carta encontrada</div>';
+                return;
+            }
+            container.innerHTML = cards.map(renderCard).join('');
+        }
+
+        // MODAL
+        function openModal(card) {
+            const content = document.getElementById('modal-content');
+            const seller = card.seller_id || 'Vendedor';
+            const actions = currentUser ? `
+                <button onclick="makeOffer('${card.id}')" style="padding: 10px 20px; background: var(--champagne); color: var(--vault); border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-right: 10px;">Fazer Oferta</button>
+                <button onclick="addWishlist('${card.id}')" style="padding: 10px 20px; background: var(--vault-2); color: var(--champagne); border: 1px solid var(--champagne); border-radius: 6px; cursor: pointer; font-weight: 600;">❤️ Wishlist</button>
+            ` : `
+                <p style="color: var(--mist); padding: 15px; background: var(--vault); border-radius: 6px;">Faça login para fazer ofertas</p>
+            `;
+
+            content.innerHTML = `
+                <div style="font-size: 80px; text-align: center; margin-bottom: 20px;">🎴</div>
+                <h2 style="color: var(--champagne); margin-bottom: 15px;">${card.card_name}</h2>
+                <p style="color: var(--mist); margin-bottom: 20px;">Vendedor: <strong>${seller}</strong></p>
+
+                <div style="background: var(--vault); padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line);">
+                        <span style="color: var(--mist);">Carta:</span>
+                        <strong>${card.card_id}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line);">
+                        <span style="color: var(--mist);">Condição:</span>
+                        <strong>${card.condition || 'NM'}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--mist);">Preço:</span>
+                        <strong style="color: var(--ok); font-size: 18px;">R$ ${parseFloat(card.price || 0).toLocaleString('pt-BR')}</strong>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    ${actions}
+                </div>
+            `;
+            document.getElementById('card-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('card-modal').classList.remove('active');
+        }
+
+        function makeOffer(cardId) {
+            alert('Oferta enviada!');
+            closeModal();
+        }
+
+        function addWishlist(cardId) {
+            alert('Adicionada à wishlist!');
+            closeModal();
+        }
+
+        // DATA LOADING
+        async function loadData() {
+            try {
+                // Marketplace
+                const listResponse = await fetch(`${API_BASE}/api/marketplace/listings`);
+                const listData = await listResponse.json();
+                allListings = listData.listings || [];
+                renderCards(allListings, 'marketplace-grid');
+
+                // Trending
+                const trendResponse = await fetch(`${API_BASE}/api/marketplace/trending`);
+                const trendData = await trendResponse.json();
+                allTrending = trendData.trending || [];
+                const trendingCards = allTrending.map(t => ({
+                    id: t.card_id,
+                    card_id: t.card_id,
+                    card_name: t.card_name,
+                    price: t.avg_price,
+                    condition: 'Popular',
+                    seller_id: 'Múltiplos'
+                }));
+                renderCards(trendingCards, 'trending-grid');
+
+                // Stats
+                let volume = allListings.reduce((sum, c) => sum + (parseFloat(c.price) || 0), 0);
+                document.getElementById('stat-cards').textContent = allListings.length + '+';
+                document.getElementById('stat-volume').textContent = 'R$ ' + volume.toLocaleString('pt-BR');
+                document.getElementById('stat-trending').textContent = allTrending.length + '+';
+
+            } catch (e) {
+                console.error('Erro ao carregar dados:', e);
+            }
+        }
+
+        function onSearch() {
+            const query = document.getElementById('search-input').value;
+            if (!query) {
+                renderCards(allListings, 'marketplace-grid');
+                return;
+            }
+            const filtered = allListings.filter(c =>
+                c.card_name.toLowerCase().includes(query.toLowerCase()) ||
+                c.card_id.toLowerCase().includes(query.toLowerCase())
+            );
+            renderCards(filtered, 'marketplace-grid');
+        }
+
+        function scrollTo(sectionId) {
+            const el = document.getElementById(sectionId);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // EVENTS
+        document.getElementById('card-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'card-modal') closeModal();
+        });
+
+        document.getElementById('login-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'login-modal') closeLoginModal();
+        });
+
+        // INIT
+        window.addEventListener('load', loadData);
+    </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking Mensal - SLABR</title>
+    <style>
+        :root {
+            --vault: #0c0f13;
+            --vault-2: #13171e;
+            --vault-3: #1a1f28;
+            --ice: #eef2f7;
+            --mist: #97a1b0;
+            --champagne: #e7c47a;
+            --line: rgba(255,255,255,.07);
+            --ok: #4ade80;
+            --gold: #fbbf24;
+            --silver: #d1d5db;
+            --bronze: #d97706;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--ice);
+            background: linear-gradient(135deg, var(--vault) 0%, #0f1535 100%);
+            min-height: 100vh;
+        }
+        .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            background: linear-gradient(to bottom, rgba(12,15,19,.94), rgba(12,15,19,.66));
+            border-bottom: 1px solid var(--line);
+        }
+        .bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 66px;
+            padding: 0 24px;
+        }
+        .brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--champagne);
+            cursor: pointer;
+        }
+
+        .hero {
+            padding: 80px 24px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(251,191,36,.1) 0%, rgba(231,196,122,.05) 100%);
+            border-bottom: 1px solid var(--line);
+        }
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        .hero h1 em {
+            font-style: normal;
+            color: var(--gold);
+        }
+        .hero p {
+            color: var(--mist);
+            font-size: 16px;
+        }
+        .mes-atual {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 16px;
+            background: var(--vault-3);
+            border: 1px solid var(--gold);
+            border-radius: 6px;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .podio-container {
+            margin: 60px 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            align-items: flex-end;
+            perspective: 1000px;
+        }
+
+        .podio-item {
+            text-align: center;
+            transition: all 0.4s ease;
+            animation: slideUp 0.6s ease backwards;
+        }
+        .podio-item:nth-child(1) { animation-delay: 0.1s; }
+        .podio-item:nth-child(2) { animation-delay: 0.2s; }
+        .podio-item:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .podio-rank {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+
+        .podio-user {
+            background: var(--vault-2);
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 30px;
+            min-width: 250px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .podio-item:nth-child(1) .podio-user {
+            border-color: var(--gold);
+            background: linear-gradient(135deg, rgba(251,191,36,.1) 0%, var(--vault-2) 100%);
+            box-shadow: 0 0 30px rgba(251,191,36,.3);
+        }
+        .podio-item:nth-child(2) .podio-user {
+            border-color: var(--silver);
+            background: linear-gradient(135deg, rgba(209,213,219,.05) 0%, var(--vault-2) 100%);
+            box-shadow: 0 0 20px rgba(209,213,219,.2);
+        }
+        .podio-item:nth-child(3) .podio-user {
+            border-color: var(--bronze);
+            background: linear-gradient(135deg, rgba(217,119,6,.1) 0%, var(--vault-2) 100%);
+            box-shadow: 0 0 20px rgba(217,119,6,.2);
+        }
+
+        .podio-username {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--ice);
+        }
+
+        .podio-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+            color: var(--mist);
+        }
+        .podio-stat {
+            padding: 8px;
+            background: var(--vault-3);
+            border-radius: 6px;
+        }
+
+        .podio-premio {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--gold);
+            padding: 15px;
+            background: var(--vault-3);
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .altura {
+            margin-top: 20px;
+            background: var(--vault-3);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .barra {
+            width: 80px;
+            background: linear-gradient(to top, var(--champagne), var(--gold));
+            border-radius: 8px 8px 0 0;
+            transition: all 0.4s;
+            min-height: 80px;
+        }
+        .podio-item:nth-child(1) .barra {
+            height: 240px;
+            background: linear-gradient(to top, var(--gold), #fcd34d);
+        }
+        .podio-item:nth-child(2) .barra {
+            height: 180px;
+            background: linear-gradient(to top, var(--silver), #e5e7eb);
+        }
+        .podio-item:nth-child(3) .barra {
+            height: 120px;
+            background: linear-gradient(to top, var(--bronze), #f59e0b);
+        }
+
+        .premios-info {
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 30px;
+            margin: 60px 0;
+            text-align: center;
+        }
+        .premios-info h2 {
+            color: var(--champagne);
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .premios-list {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .premio-item {
+            flex: 1;
+            min-width: 150px;
+        }
+        .premio-badge {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .premio-valor {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        .premio-desc {
+            font-size: 13px;
+            color: var(--mist);
+            margin-top: 5px;
+        }
+
+        .howto {
+            background: var(--vault-2);
+            border-left: 4px solid var(--champagne);
+            border-radius: 8px;
+            padding: 30px;
+            margin: 60px 0;
+        }
+        .howto h3 {
+            color: var(--champagne);
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .howto ol {
+            margin-left: 20px;
+            color: var(--mist);
+            line-height: 1.8;
+        }
+        .howto li {
+            margin-bottom: 10px;
+        }
+        .howto strong {
+            color: var(--ice);
+        }
+
+        footer {
+            border-top: 1px solid var(--line);
+            padding: 30px 0;
+            text-align: center;
+            color: var(--mist);
+            font-size: 12px;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 1000px) {
+            .podio-container {
+                flex-direction: column;
+                gap: 40px;
+                align-items: center;
+            }
+            .altura {
+                width: 100%;
+                height: 100px;
+            }
+            .barra {
+                width: 100%;
+            }
+            .podio-item:nth-child(1) .barra,
+            .podio-item:nth-child(2) .barra,
+            .podio-item:nth-child(3) .barra {
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="bar">
+            <div class="brand" onclick="location.href='/home-public'">🃏 SLABR</div>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <div class="hero">
+        <div class="wrap">
+            <h1>🏆 Ranking <em>Mensal</em></h1>
+            <p>Os top 3 colecionadores do mês ganham prêmios exclusivos!</p>
+            <div class="mes-atual" id="mes-display">Junho 2026</div>
+        </div>
+    </div>
+
+    <div class="wrap">
+        <!-- PODIO -->
+        <div id="podio-container" class="podio-container">
+            <div style="text-align: center; color: var(--mist); grid-column: 1/-1;">Carregando ranking...</div>
+        </div>
+
+        <!-- PREMIOS -->
+        <div class="premios-info">
+            <h2>💰 Prêmios do Mês</h2>
+            <div class="premios-list">
+                <div class="premio-item">
+                    <div class="premio-badge">🥇</div>
+                    <div class="premio-valor">R$ 200</div>
+                    <div class="premio-desc">1º lugar</div>
+                </div>
+                <div class="premio-item">
+                    <div class="premio-badge">🥈</div>
+                    <div class="premio-valor">R$ 100</div>
+                    <div class="premio-desc">2º lugar</div>
+                </div>
+                <div class="premio-item">
+                    <div class="premio-badge">🥉</div>
+                    <div class="premio-valor">R$ 50</div>
+                    <div class="premio-desc">3º lugar</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMO FUNCIONA -->
+        <div class="howto">
+            <h3>🎯 Como Participar?</h3>
+            <ol>
+                <li>Faça <strong>login</strong> em sua conta</li>
+                <li>Adicione <strong>cartas graduadas</strong> à sua coleção</li>
+                <li>Marque como <strong>públicas</strong> para aparecer no ranking</li>
+                <li>Quanto mais cartas e maior o patrimônio, maior sua chance de ganhar!</li>
+                <li>Top 3 é atualizado <strong>mensalmente</strong> e prêmios são transferidos</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="wrap">
+        <p>SLABR Ranking Mensal - Prêmios exclusivos para colecionadores ativos</p>
+    </footer>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        async function loadRanking() {
+            try {
+                const res = await fetch(`${API_BASE}/api/ranking-mensal`);
+                const data = await res.json();
+
+                if (!data.ok || !data.ranking || data.ranking.length === 0) {
+                    document.getElementById('podio-container').innerHTML =
+                        '<div style="grid-column: 1/-1; color: var(--mist); text-align: center;">Ranking vazio este mês</div>';
+                    return;
+                }
+
+                // Update month display
+                const [year, month] = data.mes.split('-');
+                const monthNames = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                                   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                document.getElementById('mes-display').textContent =
+                    `${monthNames[parseInt(month)]} ${year}`;
+
+                // Render podium
+                const html = data.ranking.map(r => `
+                    <div class="podio-item">
+                        <div class="podio-rank">${r.badge}</div>
+                        <div class="podio-user">
+                            <div class="podio-username">${r.usuario}</div>
+                            <div class="podio-stats">
+                                <div class="podio-stat">💎 ${r.cartas} cartas</div>
+                                <div class="podio-stat">💰 R$ ${r.patrimonio.toLocaleString('pt-BR')}</div>
+                            </div>
+                            ${r.premio > 0 ? `<div class="podio-premio">+ R$ ${r.premio}</div>` : ''}
+                        </div>
+                        <div class="altura">
+                            <div class="barra"></div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.getElementById('podio-container').innerHTML = html;
+            } catch (e) {
+                console.error('Erro:', e);
+                document.getElementById('podio-container').innerHTML =
+                    '<div style="color: red;">Erro ao carregar ranking</div>';
+            }
+        }
+
+        window.addEventListener('load', loadRanking);
+    </script>
+</body>
+</html>

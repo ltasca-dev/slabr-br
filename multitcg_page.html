@@ -1,0 +1,325 @@
+<!-- Multi-TCG Support Page -->
+
+<div id="multitcg-page" style="display:none; padding: 20px;">
+  <h1>Multiplos TCGs</h1>
+
+  <!-- TCG Selector -->
+  <div style="margin-bottom: 30px;">
+    <div style="background:var(--vault-2); padding:20px; border-radius:10px; margin-bottom:20px;">
+      <h2 style="color:var(--champagne); margin-bottom:15px;">Escolha seu TCG</h2>
+      <div id="tcg-selector" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px;">
+        <!-- TCGs preenchidos dinamicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div style="border-bottom:2px solid var(--line); margin-bottom:30px;">
+    <button onclick="switchMultiTab('collections')" style="padding:15px 20px; background:none; border:none; color:var(--champagne); cursor:pointer; font-size:16px; font-weight:bold; border-bottom:3px solid var(--champagne);">
+      Minhas Colecoes
+    </button>
+    <button onclick="switchMultiTab('marketplace')" style="padding:15px 20px; background:none; border:none; color:var(--mist); cursor:pointer; font-size:16px; font-weight:bold;">
+      Marketplace Global
+    </button>
+    <button onclick="switchMultiTab('preferences')" style="padding:15px 20px; background:none; border:none; color:var(--mist); cursor:pointer; font-size:16px; font-weight:bold;">
+      Preferencias
+    </button>
+  </div>
+
+  <!-- Collections Tab -->
+  <div id="multi-collections-tab" style="display:block;">
+    <h3 style="color:var(--champagne); margin-bottom:20px;">Colecoes por TCG</h3>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px;">
+      <div style="background:var(--vault-2); padding:20px; border-radius:10px; border-left:4px solid var(--champagne);">
+        <div style="color:var(--mist); font-size:12px; margin-bottom:10px;">POKEMON</div>
+        <div style="font-size:24px; font-weight:bold; color:var(--champagne); margin-bottom:20px;" id="pokemon-count">0</div>
+        <button onclick="viewCollection('pokemon')" style="padding:10px 15px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer; width:100%;">
+          Ver Colecao
+        </button>
+      </div>
+
+      <div style="background:var(--vault-2); padding:20px; border-radius:10px; border-left:4px solid #8B4513;">
+        <div style="color:var(--mist); font-size:12px; margin-bottom:10px;">MAGIC</div>
+        <div style="font-size:24px; font-weight:bold; color:#D4A574; margin-bottom:20px;" id="magic-count">0</div>
+        <button onclick="viewCollection('magic')" style="padding:10px 15px; background:#8B4513; color:white; border:none; border-radius:5px; cursor:pointer; width:100%;">
+          Ver Colecao
+        </button>
+      </div>
+
+      <div style="background:var(--vault-2); padding:20px; border-radius:10px; border-left:4px solid #FF1493;">
+        <div style="color:var(--mist); font-size:12px; margin-bottom:10px;">YU-GI-OH!</div>
+        <div style="font-size:24px; font-weight:bold; color:#FF69B4; margin-bottom:20px;" id="yugioh-count">0</div>
+        <button onclick="viewCollection('yugioh')" style="padding:10px 15px; background:#FF1493; color:white; border:none; border-radius:5px; cursor:pointer; width:100%;">
+          Ver Colecao
+        </button>
+      </div>
+
+      <div style="background:var(--vault-2); padding:20px; border-radius:10px; border-left:4px solid #FF6347;">
+        <div style="color:var(--mist); font-size:12px; margin-bottom:10px;">ONE PIECE</div>
+        <div style="font-size:24px; font-weight:bold; color:#FFA500; margin-bottom:20px;" id="onepiece-count">0</div>
+        <button onclick="viewCollection('onepiece')" style="padding:10px 15px; background:#FF6347; color:white; border:none; border-radius:5px; cursor:pointer; width:100%;">
+          Ver Colecao
+        </button>
+      </div>
+    </div>
+
+    <!-- Colecao detalhe -->
+    <div id="collection-detail" style="margin-top:40px; display:none;">
+      <h3 style="color:var(--champagne); margin-bottom:20px;" id="collection-tcg-name"></h3>
+      <div id="collection-cards" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:15px;">
+        <!-- Cards preenchidas dinamicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Marketplace Global Tab -->
+  <div id="multi-marketplace-tab" style="display:none;">
+    <h3 style="color:var(--champagne); margin-bottom:20px;">Marketplace Global</h3>
+
+    <div style="background:var(--vault-2); padding:20px; border-radius:10px; margin-bottom:20px;">
+      <input id="global-search" type="text" placeholder="Buscar carta (ex: Charizard)" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:5px; background:var(--vault); color:var(--champagne); margin-bottom:10px;">
+      <select id="global-tcg-filter" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:5px; background:var(--vault); color:var(--champagne); margin-bottom:10px;">
+        <option value="">Todos TCGs</option>
+        <option value="pokemon">Pokemon</option>
+        <option value="magic">Magic</option>
+        <option value="yugioh">Yu-Gi-Oh!</option>
+        <option value="onepiece">One Piece</option>
+      </select>
+      <button onclick="searchGlobalMarketplace()" style="width:100%; padding:10px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+        Buscar
+      </button>
+    </div>
+
+    <div id="global-listings" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:15px;">
+      <!-- Listings preenchidas dinamicamente -->
+    </div>
+  </div>
+
+  <!-- Preferencias Tab -->
+  <div id="multi-preferences-tab" style="display:none;">
+    <h3 style="color:var(--champagne); margin-bottom:20px;">Preferencias por TCG</h3>
+
+    <div id="preferences-list" style="display:grid; gap:15px;">
+      <!-- Preferencias preenchidas dinamicamente -->
+    </div>
+  </div>
+</div>
+
+<script>
+// Multi-TCG Functions
+
+const CURRENT_USER = 'leonardo'; // TODO: Pegar do login real
+let selectedTCG = null;
+
+async function loadTCGs() {
+  try {
+    const response = await fetch('/api/tcg/list');
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      const tcgSelector = document.getElementById('tcg-selector');
+      tcgSelector.innerHTML = data.tcgs.map(tcg => `
+        <div onclick="selectTCG('${tcg.id}')" style="background:var(--vault); padding:15px; border-radius:10px; cursor:pointer; border:2px solid var(--line); transition:0.3s;">
+          <div style="font-weight:bold; color:var(--champagne); margin-bottom:5px;">${tcg.display_name}</div>
+          <div style="font-size:12px; color:var(--mist);">${tcg.description}</div>
+        </div>
+      `).join('');
+    }
+  } catch (error) {
+    console.error('Erro ao carregar TCGs:', error);
+  }
+}
+
+function selectTCG(tcgId) {
+  selectedTCG = tcgId;
+  loadCollections();
+}
+
+async function loadCollections() {
+  try {
+    const url = selectedTCG
+      ? `/api/collections/v2/${CURRENT_USER}?tcg_id=${selectedTCG}`
+      : `/api/collections/v2/${CURRENT_USER}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      // Atualizar contadores
+      const tcgCounts = { pokemon: 0, magic: 0, yugioh: 0, onepiece: 0 };
+      data.collections.forEach(c => {
+        if (tcgCounts.hasOwnProperty(c.tcg_id)) {
+          tcgCounts[c.tcg_id]++;
+        }
+      });
+
+      document.getElementById('pokemon-count').textContent = tcgCounts.pokemon;
+      document.getElementById('magic-count').textContent = tcgCounts.magic;
+      document.getElementById('yugioh-count').textContent = tcgCounts.yugioh;
+      document.getElementById('onepiece-count').textContent = tcgCounts.onepiece;
+
+      // Mostrar detalhe se TCG selecionado
+      if (selectedTCG && data.collections.length > 0) {
+        showCollectionDetail(selectedTCG, data.collections);
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao carregar colecoes:', error);
+  }
+}
+
+function showCollectionDetail(tcgId, collections) {
+  const tcgNames = {
+    'pokemon': 'Pokemon Trading Card Game',
+    'magic': 'Magic: The Gathering',
+    'yugioh': 'Yu-Gi-Oh! Trading Card Game',
+    'onepiece': 'One Piece Card Game'
+  };
+
+  document.getElementById('collection-tcg-name').textContent = tcgNames[tcgId] || tcgId;
+  document.getElementById('collection-detail').style.display = 'block';
+
+  const html = collections.map(c => `
+    <div style="background:var(--vault-2); padding:15px; border-radius:10px;">
+      <div style="font-weight:bold; color:var(--champagne); margin-bottom:5px;">${c.card_name}</div>
+      <div style="font-size:12px; color:var(--mist); margin-bottom:10px;">
+        Quantidade: ${c.quantity} | Condicao: ${c.condition}
+      </div>
+      <div style="font-size:14px; color:var(--champagne); font-weight:bold;">
+        R$ ${parseFloat(c.purchase_price).toFixed(2)}
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('collection-cards').innerHTML = html;
+}
+
+function viewCollection(tcgId) {
+  selectTCG(tcgId);
+  switchMultiTab('collections');
+}
+
+async function searchGlobalMarketplace() {
+  try {
+    const searchTerm = document.getElementById('global-search').value;
+    const tcgFilter = document.getElementById('global-tcg-filter').value;
+
+    let url = '/api/marketplace/v2/global';
+    if (searchTerm) url += `?card_name=${searchTerm}`;
+    if (tcgFilter) url += (url.includes('?') ? '&' : '?') + `tcg_id=${tcgFilter}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      const listingsDiv = document.getElementById('global-listings');
+      let html = '';
+
+      for (const market in data.markets) {
+        const marketData = data.markets[market];
+        marketData.listings.forEach(listing => {
+          html += `
+            <div style="background:var(--vault-2); padding:15px; border-radius:10px;">
+              <div style="font-weight:bold; color:var(--champagne); margin-bottom:5px;">${listing.card_name}</div>
+              <div style="font-size:12px; color:var(--mist); margin-bottom:10px;">
+                TCG: ${listing.tcg_id.toUpperCase()} | Qtd: ${listing.quantity}
+              </div>
+              <div style="font-size:12px; color:var(--mist); margin-bottom:10px;">
+                Condicao: ${listing.condition} | Tipo: ${listing.listing_type}
+              </div>
+              <div style="font-size:16px; color:var(--champagne); font-weight:bold;">
+                ${listing.currency} ${parseFloat(listing.price).toFixed(2)}
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      listingsDiv.innerHTML = html || '<p style="color:var(--mist);">Nenhum anuncio encontrado</p>';
+    }
+  } catch (error) {
+    console.error('Erro ao buscar marketplace global:', error);
+  }
+}
+
+async function loadPreferences() {
+  try {
+    const response = await fetch(`/api/users/${CURRENT_USER}/preferences`);
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      const prefList = document.getElementById('preferences-list');
+
+      const tcgNames = {
+        'pokemon': 'Pokemon',
+        'magic': 'Magic: The Gathering',
+        'yugioh': 'Yu-Gi-Oh!',
+        'onepiece': 'One Piece'
+      };
+
+      prefList.innerHTML = (data.preferences || []).map(pref => `
+        <div style="background:var(--vault-2); padding:20px; border-radius:10px;">
+          <h4 style="color:var(--champagne); margin-bottom:10px;">${tcgNames[pref.tcg_id] || pref.tcg_id}</h4>
+          <div style="color:var(--mist); font-size:12px; margin-bottom:15px;">
+            <div>Moeda preferida: <strong>${pref.currency}</strong></div>
+            <div>Idioma: <strong>${pref.language}</strong></div>
+            <div>Favorito: <strong>${pref.favorite ? 'Sim' : 'Nao'}</strong></div>
+          </div>
+          <button onclick="editPreference('${pref.tcg_id}')" style="padding:10px 15px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer;">
+            Editar
+          </button>
+        </div>
+      `).join('');
+    }
+  } catch (error) {
+    console.error('Erro ao carregar preferencias:', error);
+  }
+}
+
+function editPreference(tcgId) {
+  const currency = prompt('Moeda preferida (BRL/USD/EUR/JPY):', 'BRL');
+  if (!currency) return;
+
+  fetch(`/api/users/${CURRENT_USER}/preferences`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      tcg_id: tcgId,
+      currency: currency.toUpperCase(),
+      language: 'pt-BR',
+      favorite: true
+    })
+  }).then(r => r.json()).then(data => {
+    if (data.status === 'success') {
+      alert('Preferencias atualizadas!');
+      loadPreferences();
+    }
+  });
+}
+
+function switchMultiTab(tab) {
+  // Hide all
+  document.getElementById('multi-collections-tab').style.display = 'none';
+  document.getElementById('multi-marketplace-tab').style.display = 'none';
+  document.getElementById('multi-preferences-tab').style.display = 'none';
+
+  // Show selected
+  if (tab === 'collections') {
+    document.getElementById('multi-collections-tab').style.display = 'block';
+    loadCollections();
+  } else if (tab === 'marketplace') {
+    document.getElementById('multi-marketplace-tab').style.display = 'block';
+  } else if (tab === 'preferences') {
+    document.getElementById('multi-preferences-tab').style.display = 'block';
+    loadPreferences();
+  }
+}
+
+function initMultiTCG() {
+  document.getElementById('multitcg-page').style.display = 'block';
+  loadTCGs();
+  loadCollections();
+  loadPreferences();
+}
+</script>

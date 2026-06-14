@@ -1,0 +1,39 @@
+﻿# CLOUDFLARE TUNNEL - GUIA DE CONFIGURACAO
+
+## INSTRUÇÕES PASSO A PASSO
+
+### STEP 1: Autorizar cloudflared
+.\cloudflared.exe tunnel login
+
+### STEP 2: Criar Named Tunnel
+.\cloudflared.exe tunnel create slabr
+
+### STEP 3: Obter ID (salve!)
+.\cloudflared.exe tunnel list
+
+### STEP 4: Configurar arquivo config.yml
+# Criar em: C:\Users\ltasca\.cloudflared\config.yml
+
+tunnel: slabr
+credentials-file: C:\Users\ltasca\.cloudflared\[TUNNEL-ID].json
+
+ingress:
+  - hostname: slabr.seu-dominio.com
+    service: http://localhost:5000
+  - service: http_status:404
+
+### STEP 5: Configurar no Dashboard
+# https://dash.cloudflare.com
+# Zero Trust > Networks > Tunnels > slabr
+# Clique em "Create public hostname"
+
+### STEP 6: Instalar como Serviço (24/7)
+.\cloudflared.exe service install
+.\cloudflared.exe service start
+
+# Ou rode manualmente:
+.\cloudflared.exe tunnel run slabr
+
+### TESTE
+https://slabr.seu-dominio.com
+

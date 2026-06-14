@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SLABR 2.0 - Trading Card Platform Completa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --vault: #0c0f13;
+            --vault-2: #13171e;
+            --vault-3: #1a1f28;
+            --ice: #eef2f7;
+            --mist: #97a1b0;
+            --mist-dim: #586273;
+            --champagne: #e7c47a;
+            --champagne-dim: #c79a4e;
+            --line: rgba(255,255,255,.07);
+            --line-strong: rgba(255,255,255,.14);
+            --ok: #4ade80;
+            --bad: #f87171;
+            --grass: #22c55e;
+            --gem: linear-gradient(110deg,#6ee7d6,#a78bfa,#f0abfc,#fbbf24,#6ee7d6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--ice);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            background: radial-gradient(1200px 620px at 70% -8%, rgba(120,140,180,.12), transparent 58%),
+                        radial-gradient(760px 420px at 12% 8%, rgba(231,196,122,.06), transparent 56%),
+                        var(--vault);
+            background-attachment: fixed;
+        }
+
+        a { color: inherit; text-decoration: none; }
+        .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+        .muted { color: var(--mist); }
+
+        @keyframes holo { to { background-position: 200% 50%; } }
+        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        @keyframes float { 0%, 100% { transform: rotateX(5deg) rotateY(-7deg); } 50% { transform: rotateX(-3deg) rotateY(7deg); } }
+
+        /* HEADER */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            backdrop-filter: blur(16px);
+            background: linear-gradient(to bottom, rgba(12,15,19,.94), rgba(12,15,19,.66));
+            border-bottom: 1px solid var(--line);
+        }
+
+        .bar {
+            display: flex;
+            align-items: center;
+            gap: 26px;
+            height: 66px;
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Bricolage Grotesque';
+            font-weight: 800;
+            font-size: 19px;
+            letter-spacing: -.02em;
+            cursor: pointer;
+        }
+
+        .brand .mk {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            background: var(--gem);
+            background-size: 200% 200%;
+            animation: holo 6s linear infinite;
+            box-shadow: 0 0 16px rgba(167,139,250,.4);
+        }
+
+        nav.menu {
+            display: flex;
+            gap: 22px;
+        }
+
+        nav.menu a {
+            color: var(--mist);
+            font-size: 14px;
+            font-weight: 500;
+            padding: 4px 0;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        nav.menu a:hover { color: var(--ice); }
+        nav.menu a.on { color: var(--ice); border-bottom-color: var(--champagne); }
+
+        .authbtns {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cta {
+            font-size: 14px;
+            font-weight: 600;
+            color: #10141a;
+            background: var(--champagne);
+            padding: 10px 16px;
+            border-radius: 9px;
+            border: none;
+            cursor: pointer;
+            transition: transform .12s;
+        }
+
+        .cta:hover { transform: translateY(-1px); }
+
+        /* MAIN CONTENT */
+        #app {
+            animation: fade .35s ease;
+            padding-bottom: 10px;
+        }
+
+        .sec {
+            padding: 30px 0;
+        }
+
+        .sec-h {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .sec-h h2 {
+            font-family: 'Bricolage Grotesque';
+            font-weight: 800;
+            font-size: 26px;
+            letter-spacing: -.02em;
+        }
+
+        .sec-h p { color: var(--mist); font-size: 14px; margin-top: 4px; }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--line);
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            color: var(--mist);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab.on {
+            color: var(--ice);
+            border-bottom: 2px solid var(--champagne);
+            margin-bottom: -2px;
+        }
+
+        .tab:hover { color: var(--ice); }
+
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+            gap: 20px;
+        }
+
+        .item {
+            cursor: pointer;
+            transition: transform .2s;
+        }
+
+        .item:hover { transform: translateY(-4px); }
+
+        .illus {
+            aspect-ratio: 5/7;
+            border-radius: 13px;
+            padding: 9px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,.14);
+            box-shadow: 0 12px 28px rgba(0,0,0,.4);
+        }
+
+        .illus.rare .holo {
+            opacity: .5;
+            animation: holo 5s linear infinite;
+        }
+
+        .illus .holo {
+            position: absolute;
+            inset: 0;
+            mix-blend-mode: color-dodge;
+            opacity: 0;
+            background: repeating-linear-gradient(115deg,rgba(255,119,115,.4)0%,rgba(255,237,95,.4)12%,rgba(95,255,237,.4)24%,rgba(115,135,255,.4)36%,rgba(255,119,221,.4)48%,rgba(255,119,115,.4)60%);
+            background-size: 200% 200%;
+        }
+
+        .illus .nm {
+            position: relative;
+            z-index: 2;
+            font-family: 'Bricolage Grotesque';
+            font-weight: 800;
+            font-size: 14px;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,.6);
+        }
+
+        .illus .emblem {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            display: grid;
+            place-items: center;
+        }
+
+        .illus .emblem span {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-family: 'Bricolage Grotesque';
+            font-weight: 800;
+            font-size: 26px;
+            color: rgba(255,255,255,.92);
+            background: rgba(255,255,255,.1);
+            border: 1.5px solid rgba(255,255,255,.35);
+            text-shadow: 0 1px 4px rgba(0,0,0,.5);
+        }
+
+        .illus .pop {
+            position: absolute;
+            z-index: 2;
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .illus .popbadge {
+            font-family: 'Space Mono';
+            font-size: 9px;
+            background: rgba(0,0,0,.42);
+            border: 1px solid rgba(255,255,255,.3);
+            padding: 3px 7px;
+            border-radius: 6px;
+            color: #fff;
+        }
+
+        .cap {
+            margin-top: 8px;
+        }
+
+        .cap .cn {
+            font-weight: 600;
+            font-size: 13.5px;
+        }
+
+        .cap .cm {
+            font-family: 'Space Mono';
+            font-size: 10px;
+            color: var(--mist);
+            margin-top: 2px;
+        }
+
+        /* FEATURES */
+        .feats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .feat {
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 22px;
+            transition: .2s;
+        }
+
+        .feat:hover {
+            border-color: var(--line-strong);
+            transform: translateY(-3px);
+        }
+
+        .feat .ic {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            font-size: 18px;
+            background: rgba(231,196,122,.1);
+            border: 1px solid var(--line-strong);
+            margin-bottom: 14px;
+        }
+
+        .feat h3 {
+            font-family: 'Bricolage Grotesque';
+            font-weight: 800;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .feat p {
+            font-size: 13px;
+            color: var(--mist);
+            line-height: 1.5;
+        }
+
+        /* FILTERS */
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter {
+            padding: 8px 12px;
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--mist);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .filter:hover, .filter.active {
+            border-color: var(--champagne);
+            color: var(--champagne);
+        }
+
+        /* STATS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: var(--vault-2);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 22px;
+            border-left: 4px solid var(--champagne);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--mist);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            letter-spacing: 0.1em;
+        }
+
+        .stat-value {
+            font-family: 'Bricolage Grotesque';
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--champagne);
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,.8);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--vault-2);
+            border: 1px solid var(--line-strong);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--champagne);
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        /* FOOTER */
+        footer {
+            border-top: 1px solid var(--line);
+            margin-top: 40px;
+            padding: 34px 0;
+        }
+
+        .foot {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+            color: var(--mist-dim);
+            font-size: 13px;
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .foot a {
+            color: var(--mist);
+            cursor: pointer;
+        }
+
+        .foot a:hover {
+            color: var(--ice);
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+
+            .feats {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+
+        /* HIDDEN */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="bar">
+            <div class="brand" onclick="switchTab('home')">
+                <div class="mk"></div>
+                SLABR 2.0
+            </div>
+            <nav class="menu">
+                <a onclick="switchTab('home')" class="on">Explorar</a>
+                <a onclick="switchTab('portfolio')">Portfolio</a>
+                <a onclick="switchTab('marketplace')">Marketplace</a>
+                <a onclick="switchTab('trending')">Tendências</a>
+                <a onclick="switchTab('multitcg')">Multi-TCG</a>
+            </nav>
+            <div class="authbtns">
+                <button class="cta" onclick="alert('Login em desenvolvimento')">Conta</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP -->
+    <div id="app">
+        <div class="wrap">
+            <!-- HOME / EXPLORAR -->
+            <div id="home-tab">
+                <div class="sec">
+                    <div class="sec-h">
+                        <div>
+                            <h2>Explorar Cartas</h2>
+                            <p>Descubra cartas raras e colecione o melhor</p>
+                        </div>
+                    </div>
+
+                    <div class="filters">
+                        <button class="filter active" onclick="filterTCG('all')">Todas</button>
+                        <button class="filter" onclick="filterTCG('pokemon')">Pokemon</button>
+                        <button class="filter" onclick="filterTCG('magic')">Magic</button>
+                        <button class="filter" onclick="filterTCG('yugioh')">Yu-Gi-Oh!</button>
+                        <button class="filter" onclick="filterTCG('onepiece')">One Piece</button>
+                    </div>
+
+                    <div class="grid" id="exploreGrid">
+                        <!-- Cartas carregadas aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PORTFOLIO -->
+            <div id="portfolio-tab" class="hidden">
+                <div class="sec">
+                    <div class="sec-h">
+                        <div>
+                            <h2>Meu Portfolio</h2>
+                            <p>Acompanhe sua coleção de cartas</p>
+                        </div>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab on" onclick="switchPortfolioTab('cards')">Minhas Cartas</button>
+                        <button class="tab" onclick="switchPortfolioTab('stats')">Estatísticas</button>
+                        <button class="tab" onclick="switchPortfolioTab('alerts')">Alertas</button>
+                    </div>
+
+                    <!-- Cartas -->
+                    <div id="portfolio-cards">
+                        <div class="grid" id="portfolioGrid">
+                            <p style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--mist);">
+                                Você ainda não adicionou cartas ao seu portfolio.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div id="portfolio-stats" class="hidden">
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">Total de Cartas</div>
+                                <div class="stat-value" id="stat-cards">0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Valor Total</div>
+                                <div class="stat-value" id="stat-value">R$ 0</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Maior Ganho</div>
+                                <div class="stat-value" id="stat-gain">-</div>
+                            </div>
+                        </div>
+                        <div class="grid" id="portfolioStatsGrid">
+                            <!-- Cartas com maior valor -->
+                        </div>
+                    </div>
+
+                    <!-- Alertas -->
+                    <div id="portfolio-alerts" class="hidden">
+                        <div class="feats">
+                            <div class="feat">
+                                <div class="ic">🔔</div>
+                                <h3>Alertas de Preço</h3>
+                                <p>Configure alertas para ser notificado quando o preço das suas cartas mudar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MARKETPLACE -->
+            <div id="marketplace-tab" class="hidden">
+                <div class="sec">
+                    <div class="sec-h">
+                        <div>
+                            <h2>Marketplace</h2>
+                            <p>Compre e venda cartas com a comunidade</p>
+                        </div>
+                    </div>
+
+                    <div class="filters">
+                        <input type="text" placeholder="Buscar cartas..." style="padding: 8px 12px; background: var(--vault-2); border: 1px solid var(--line); border-radius: 8px; color: var(--ice); flex: 1; max-width: 300px;">
+                        <button class="filter">Venda</button>
+                        <button class="filter active">Troca</button>
+                        <button class="filter">Menor Preço</button>
+                    </div>
+
+                    <div class="grid" id="marketplaceGrid">
+                        <!-- Listagens carregadas aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TENDÊNCIAS -->
+            <div id="trending-tab" class="hidden">
+                <div class="sec">
+                    <div class="sec-h">
+                        <div>
+                            <h2>Tendências Agora</h2>
+                            <p>As cartas mais procuradas do momento</p>
+                        </div>
+                    </div>
+
+                    <div class="grid" id="trendingGrid">
+                        <!-- Cartas em tendência -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- MULTI-TCG -->
+            <div id="multitcg-tab" class="hidden">
+                <div class="sec">
+                    <div class="sec-h">
+                        <div>
+                            <h2>Multi-TCG</h2>
+                            <p>Gerencie coleções de múltiplos TCGs em um só lugar</p>
+                        </div>
+                    </div>
+
+                    <div class="feats">
+                        <div class="feat" onclick="selectMultiTCG('pokemon')">
+                            <div class="ic">🔥</div>
+                            <h3>Pokemon</h3>
+                            <p>Trading Card Game - Fase 1 ✓</p>
+                        </div>
+                        <div class="feat" onclick="selectMultiTCG('magic')">
+                            <div class="ic">✨</div>
+                            <h3>Magic</h3>
+                            <p>The Gathering - Fase 2a ✓</p>
+                        </div>
+                        <div class="feat" onclick="selectMultiTCG('yugioh')">
+                            <div class="ic">👁️</div>
+                            <h3>Yu-Gi-Oh!</h3>
+                            <p>Trading Card Game - Fase 2a ✓</p>
+                        </div>
+                        <div class="feat" onclick="selectMultiTCG('onepiece')">
+                            <div class="ic">🏴‍☠️</div>
+                            <h3>One Piece</h3>
+                            <p>Card Game - Fase 2a ✓</p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 40px;">
+                        <h3 style="color: var(--champagne); margin-bottom: 20px;">Coleções por TCG</h3>
+                        <div class="grid" id="multitcgGrid">
+                            <!-- Cartas multi-tcg -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal" id="cardModal">
+        <div class="modal-content" id="modalContent">
+            <!-- Conteúdo da modal -->
+        </div>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="foot">
+            <div>
+                <strong>SLABR 2.0</strong> - Trading Card Platform<br>
+                <span style="font-size: 11px;">Fase 1 ✓ + Fase 2a ✓ | 46 Endpoints | 18 Tables | 94% Tests</span>
+            </div>
+            <div>
+                <a href="#">Sobre</a><br>
+                <a href="#">Privacidade</a><br>
+                <a href="#">Termos</a>
+            </div>
+            <div>
+                <a href="#">Suporte</a><br>
+                <a href="#">FAQ</a><br>
+                <a href="#">Contato</a>
+            </div>
+            <div style="text-align: right;">
+                <p>Email: a4s.ai@a4solutions.com.br</p>
+                <p style="font-size: 11px; margin-top: 10px;">© 2026 SLABR. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const BASE_URL = 'http://localhost:5000';
+        const CURRENT_USER = 'leonardo';
+
+        // Dados de exemplo
+        const SAMPLE_CARDS = [
+            { id: 'base1-4', name: 'Charizard', tcg: 'pokemon', set: 'Base Set', price: 1500, rarity: 'Holo Rare', image: '🔥', grade: 8.5 },
+            { id: 'base1-25', name: 'Pikachu', tcg: 'pokemon', set: 'Base Set', price: 250, rarity: 'Holo Rare', image: '⚡', grade: 9 },
+            { id: 'base1-6', name: 'Gyarados', tcg: 'pokemon', set: 'Base Set', price: 450, rarity: 'Holo Rare', image: '🌊', grade: 8 },
+            { id: 'tsr-123', name: 'Black Lotus', tcg: 'magic', set: 'TSR', price: 5000, rarity: 'Mythic', image: '🌸', grade: 9.5 },
+            { id: 'lob-001', name: 'Blue-Eyes', tcg: 'yugioh', set: 'LOB', price: 800, rarity: 'Ultra Rare', image: '👁️', grade: 8.5 },
+            { id: 'op-001', name: 'Luffy SR', tcg: 'onepiece', set: 'Romance Dawn', price: 300, rarity: 'Super Rare', image: '🏴‍☠️', grade: 9 }
+        ];
+
+        // Renderizar cartas
+        function renderCards(cards, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            container.innerHTML = cards.map(card => `
+                <div class="item" onclick="openModal(${JSON.stringify(card).replace(/"/g, '&quot;')})">
+                    <div class="illus rare">
+                        <div class="emblem"><span>${card.image}</span></div>
+                        <div class="holo"></div>
+                        <div class="pop"><span class="popbadge">${card.rarity}</span></div>
+                    </div>
+                    <div class="cap">
+                        <div class="cn">${card.name}</div>
+                        <div class="cm">${card.tcg.toUpperCase()} • R$ ${card.price.toLocaleString('pt-BR')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Abrir modal
+        function openModal(card) {
+            const content = document.getElementById('modalContent');
+            content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 120px; text-align: center; margin-bottom: 20px;">${card.image}</div>
+                    <h2 style="color: var(--champagne); margin-bottom: 10px;">${card.name}</h2>
+                    <p class="muted" style="margin-bottom: 20px;">${card.tcg.toUpperCase()} • ${card.set}</p>
+
+                    <div style="background: var(--vault); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line);">
+                            <span class="muted">Raridade:</span>
+                            <strong>${card.rarity}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line);">
+                            <span class="muted">Grade:</span>
+                            <strong>${card.grade}/10</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="muted">Preço:</span>
+                            <strong style="color: var(--ok);">R$ ${card.price.toLocaleString('pt-BR')}</strong>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button class="cta" onclick="addToCart('${card.id}')">Comprar</button>
+                        <button class="cta" style="background: var(--vault-2); color: var(--champagne); border: 1px solid var(--line-strong);" onclick="addToPortfolio('${card.id}')">Portfolio</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('cardModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('cardModal').classList.remove('active');
+        }
+
+        // Filtros
+        function filterTCG(tcg) {
+            const filtered = tcg === 'all' ? SAMPLE_CARDS : SAMPLE_CARDS.filter(c => c.tcg === tcg);
+            renderCards(filtered, 'exploreGrid');
+            document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('[id$="-tab"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+
+            document.querySelectorAll('nav.menu a').forEach(a => a.classList.remove('on'));
+            event.target.classList.add('on');
+
+            // Carregar dados
+            if (tabName === 'home') renderCards(SAMPLE_CARDS, 'exploreGrid');
+            if (tabName === 'portfolio') renderCards(SAMPLE_CARDS.slice(0, 3), 'portfolioGrid');
+            if (tabName === 'marketplace') renderCards(SAMPLE_CARDS, 'marketplaceGrid');
+            if (tabName === 'trending') renderCards(SAMPLE_CARDS.sort(() => Math.random() - 0.5).slice(0, 8), 'trendingGrid');
+            if (tabName === 'multitcg') renderCards(SAMPLE_CARDS, 'multitcgGrid');
+        }
+
+        function switchPortfolioTab(tab) {
+            document.getElementById('portfolio-cards').classList.add('hidden');
+            document.getElementById('portfolio-stats').classList.add('hidden');
+            document.getElementById('portfolio-alerts').classList.add('hidden');
+            document.getElementById('portfolio-' + tab).classList.remove('hidden');
+
+            document.querySelectorAll('#portfolio-tab .tab').forEach(t => t.classList.remove('on'));
+            event.target.classList.add('on');
+
+            if (tab === 'stats') {
+                document.getElementById('stat-cards').textContent = '3';
+                document.getElementById('stat-value').textContent = 'R$ 2.200';
+                document.getElementById('stat-gain').textContent = '+R$ 1.500';
+                renderCards(SAMPLE_CARDS.slice(0, 3), 'portfolioStatsGrid');
+            }
+        }
+
+        function selectMultiTCG(tcg) {
+            const filtered = SAMPLE_CARDS.filter(c => c.tcg === tcg);
+            renderCards(filtered, 'multitcgGrid');
+        }
+
+        // Ações
+        function addToCart(cardId) {
+            alert(`Carta ${cardId} adicionada ao carrinho!`);
+            closeModal();
+        }
+
+        function addToPortfolio(cardId) {
+            alert(`Carta ${cardId} adicionada ao seu portfolio!`);
+            closeModal();
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('cardModal').addEventListener('click', (e) => {
+            if (e.target.id === 'cardModal') closeModal();
+        });
+
+        // Inicializar
+        window.addEventListener('load', () => {
+            renderCards(SAMPLE_CARDS, 'exploreGrid');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+================================================================================
+  SLABR - CLOUDFLARE TUNNEL SETUP CONCLUÍDO
+  Data: 14/06/2026
+================================================================================
+
+[✓] COMPLETADO:
+  - Login no Cloudflare: OK
+  - Tunnel criado: slabr
+  - ID do Tunnel: 213746ab-6cc5-4b80-aaf1-0ee21e1a9601
+  - Arquivo config.yml: Salvo em ~/.cloudflared/
+
+[PROXIMOS PASSOS - PARA COLOCAR ONLINE]:
+
+1. Vá para https://dash.cloudflare.com
+
+2. Selecione seu DOMINIO
+
+3. Navegue até: Zero Trust > Networks > Tunnels
+
+4. Clique no tunnel "slabr"
+
+5. Clique em "+ Create public hostname"
+
+6. PREENCHA:
+   Subdomain:  slabr
+   Domain:     [seu-dominio].com.br
+   Type:       HTTP
+   URL:        localhost:5000
+
+7. Clique em "Save hostname"
+
+[RESULTADO FINAL]:
+  https://slabr.[seu-dominio].com.br (ATIVO)
+
+[PARA MANTER 24/7]:
+
+OPCAO 1 - RECOMENDADO (Serviço Windows):
+
+  cd C:\Users\ltasca\Documents\Slab\slabr-br
+  .\cloudflared.exe service install
+  .\cloudflared.exe service start
+
+  (Executa automaticamente, mesmo após reiniciar)
+
+OPCAO 2 - Mantenha terminal aberto:
+
+  cd C:\Users\ltasca\Documents\Slab\slabr-br
+  .\cloudflared.exe tunnel run slabr
+
+[VERIFICAR]:
+  .\cloudflared.exe service status
+
+[COMPARTILHAR]:
+  https://slabr.[seu-dominio].com.br/home-public
+
+PARABENS! SLABR esta pronto para usuarios!
+================================================================================

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "C:\Users\ltasca\Documents\Slab\slabr-br\api.py", line 704, in <module>
+    @app.post("/api/marketplace/criar-listagem", methods=["POST","OPTIONS"])
+     ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\site-packages\flask\sansio\scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "C:\Python314\Lib\site-packages\flask\sansio\scaffold.py", line 309, in post
+    return self._method_route("POST", rule, options)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\site-packages\flask\sansio\scaffold.py", line 291, in _method_route
+    raise TypeError("Use the 'route' decorator to use the 'methods' argument.")
+TypeError: Use the 'route' decorator to use the 'methods' argument.
