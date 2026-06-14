@@ -1,0 +1,320 @@
+<!-- Marketplace - Página de Compra/Venda/Troca -->
+
+<div id="marketplace-page" style="display:none; padding: 20px;">
+  <h1>Marketplace - Comprar, Vender, Trocar</h1>
+
+  <!-- Tabs: Explorar vs Meus Anuncios vs Historico -->
+  <div style="border-bottom: 2px solid var(--line); margin-bottom: 20px;">
+    <button onclick="showMarketTab('explore')" class="tab-btn active" style="padding:15px 20px; background:none; border:none; border-bottom:3px solid var(--champagne); color:var(--champagne); cursor:pointer; font-size:14px; font-weight:bold;">
+      🔍 Explorar
+    </button>
+    <button onclick="showMarketTab('my-listings')" class="tab-btn" style="padding:15px 20px; background:none; border:none; border-bottom:3px solid transparent; color:var(--mist); cursor:pointer; font-size:14px;">
+      📤 Meus Anuncios
+    </button>
+    <button onclick="showMarketTab('history')" class="tab-btn" style="padding:15px 20px; background:none; border:none; border-bottom:3px solid transparent; color:var(--mist); cursor:pointer; font-size:14px;">
+      📋 Historico
+    </button>
+  </div>
+
+  <!-- TAB 1: EXPLORAR MARKETPLACE -->
+  <div id="explore-tab" style="display:block;">
+    <div style="margin-bottom:30px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;">
+      <input type="text" id="search-card" placeholder="Procurar carta..." style="padding:10px; border:1px solid var(--line); border-radius:5px;">
+      <input type="number" id="filter-min-price" placeholder="Preco minimo" style="padding:10px; border:1px solid var(--line); border-radius:5px;">
+      <input type="number" id="filter-max-price" placeholder="Preco maximo" style="padding:10px; border:1px solid var(--line); border-radius:5px;">
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px; margin-bottom:40px;">
+      <h3 style="grid-column:1/-1;">Trending (Em Alta)</h3>
+      <div id="trending-list" style="grid-column:1/-1; display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:15px;">
+        <p style="color:var(--mist);">Carregando...</p>
+      </div>
+
+      <h3 style="grid-column:1/-1; margin-top:30px;">Melhores Ofertas</h3>
+      <div id="deals-list" style="grid-column:1/-1; display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:15px;">
+        <p style="color:var(--mist);">Carregando...</p>
+      </div>
+
+      <h3 style="grid-column:1/-1; margin-top:30px;">Todos os Anuncios</h3>
+      <div id="listings-list" style="grid-column:1/-1; display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:15px;">
+        <p style="color:var(--mist);">Carregando...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: MEUS ANUNCIOS -->
+  <div id="my-listings-tab" style="display:none;">
+    <div style="margin-bottom:30px; padding:20px; background:var(--vault-2); border-radius:10px;">
+      <h3>Criar Novo Anuncio</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+        <input type="text" id="new-listing-card-id" placeholder="Card ID" style="padding:10px; border:1px solid var(--line); border-radius:5px;">
+        <input type="text" id="new-listing-card-name" placeholder="Nome da Carta" style="padding:10px; border:1px solid var(--line); border-radius:5px;">
+        <input type="number" id="new-listing-price" placeholder="Preco (R$)" style="padding:10px; border:1px solid var(--line); border-radius:5px;">
+        <select id="new-listing-type" style="padding:10px; border:1px solid var(--line); border-radius:5px;">
+          <option value="sale">Venda</option>
+          <option value="trade">Troca</option>
+        </select>
+      </div>
+      <button onclick="createListing()" style="margin-top:15px; padding:10px 20px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+        + Criar Anuncio
+      </button>
+    </div>
+
+    <h3>Meus Anuncios Ativos</h3>
+    <div id="my-listings-list" style="display:grid; gap:15px;">
+      <p style="color:var(--mist);">Nenhum anuncio ativo</p>
+    </div>
+  </div>
+
+  <!-- TAB 3: HISTORICO DE TRADES -->
+  <div id="history-tab" style="display:none;">
+    <h3>Minhas Transacoes</h3>
+    <div id="history-list" style="display:grid; gap:15px;">
+      <p style="color:var(--mist);">Nenhuma transacao</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Marketplace Functions
+
+const CURRENT_USER = 'leonardo'; // TODO: Pegar do login real
+
+function showMarketTab(tab) {
+  // Hide all tabs
+  document.querySelectorAll('[id$="-tab"]').forEach(el => {
+    if (el.id.includes('market') || el.id.includes('explore') || el.id.includes('my-listings') || el.id.includes('history')) {
+      el.style.display = 'none';
+    }
+  });
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.style.borderBottom = '3px solid transparent';
+    btn.style.color = 'var(--mist)';
+  });
+
+  // Show selected tab
+  document.getElementById(tab + '-tab').style.display = 'block';
+  event.target.style.borderBottom = '3px solid var(--champagne)';
+  event.target.style.color = 'var(--champagne)';
+
+  // Load data
+  if (tab === 'explore') {
+    loadTrending();
+    loadDeals();
+    loadListings();
+  }
+  if (tab === 'my-listings') loadMyListings();
+  if (tab === 'history') loadHistory();
+}
+
+async function loadTrending() {
+  try {
+    const response = await fetch('/api/marketplace/trending');
+    const data = await response.json();
+
+    if (data.status === 'success' && data.trending.length > 0) {
+      const html = data.trending.map(card => `
+        <div style="background:var(--vault-2); padding:15px; border-radius:10px; border-top:3px solid var(--champagne);">
+          <div style="font-weight:bold; font-size:14px;">${card.card_name}</div>
+          <div style="font-size:12px; color:var(--mist); margin-top:5px;">${card.listing_count} anuncios</div>
+          <div style="font-size:12px; color:var(--champagne); font-weight:bold; margin-top:8px;">
+            R$ ${card.min_price.toFixed(2)} - R$ ${card.max_price.toFixed(2)}
+          </div>
+          <button onclick="searchCard('${card.card_name}')" style="margin-top:10px; padding:5px 10px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer; font-size:12px;">
+            Ver Anuncios
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('trending-list').innerHTML = html;
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+  }
+}
+
+async function loadDeals() {
+  try {
+    const response = await fetch('/api/marketplace/deals');
+    const data = await response.json();
+
+    if (data.status === 'success' && data.deals.length > 0) {
+      const html = data.deals.map(deal => `
+        <div style="background:var(--vault-2); padding:15px; border-radius:10px; border-left:4px solid #28a745;">
+          <div style="font-weight:bold; font-size:14px;">${deal.card_name}</div>
+          <div style="font-size:12px; color:var(--mist);">Condicao: ${deal.condition}</div>
+          <div style="font-size:16px; font-weight:bold; color:#28a745; margin-top:10px;">R$ ${deal.best_price.toFixed(2)}</div>
+          <button onclick="buyListing('${deal.listing_id}')" style="margin-top:10px; width:100%; padding:8px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+            Comprar
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('deals-list').innerHTML = html;
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+  }
+}
+
+async function loadListings() {
+  try {
+    const response = await fetch('/api/marketplace/listings');
+    const data = await response.json();
+
+    if (data.status === 'success' && data.listings.length > 0) {
+      const html = data.listings.map(listing => `
+        <div style="background:var(--vault-2); padding:15px; border-radius:10px;">
+          <div style="font-weight:bold;">${listing.card_name}</div>
+          <div style="font-size:12px; color:var(--mist); margin-top:5px;">
+            Tipo: ${listing.listing_type === 'sale' ? 'Venda' : 'Troca'}
+          </div>
+          <div style="font-size:12px; color:var(--mist);">Condicao: ${listing.condition}</div>
+          <div style="font-size:16px; font-weight:bold; color:var(--champagne); margin-top:10px;">
+            R$ ${listing.price.toFixed(2)}
+          </div>
+          <button onclick="buyListing('${listing.id}')" style="margin-top:10px; width:100%; padding:8px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+            ${listing.listing_type === 'sale' ? 'Comprar' : 'Propor Troca'}
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('listings-list').innerHTML = html;
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+  }
+}
+
+async function createListing() {
+  const cardId = document.getElementById('new-listing-card-id').value;
+  const cardName = document.getElementById('new-listing-card-name').value;
+  const price = document.getElementById('new-listing-price').value;
+  const type = document.getElementById('new-listing-type').value;
+
+  if (!cardId || !cardName || !price) {
+    alert('Preencha todos os campos');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/marketplace/listings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        seller_id: CURRENT_USER,
+        card_id: cardId,
+        card_name: cardName,
+        price: parseFloat(price),
+        listing_type: type
+      })
+    });
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      alert('Anuncio criado!');
+      document.getElementById('new-listing-card-id').value = '';
+      document.getElementById('new-listing-card-name').value = '';
+      document.getElementById('new-listing-price').value = '';
+      loadMyListings();
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+  }
+}
+
+async function buyListing(listingId) {
+  if (!confirm('Deseja comprar esta carta?')) return;
+
+  try {
+    const response = await fetch('/api/marketplace/trades', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        listing_id: listingId,
+        buyer_id: CURRENT_USER,
+        amount: 0 // Aqui entraria o valor real de pagamento
+      })
+    });
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      alert('Trade criada! Aguardando confirma');
+      loadListings();
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+  }
+}
+
+async function loadMyListings() {
+  try {
+    const response = await fetch('/api/marketplace/listings?seller_id=' + CURRENT_USER);
+    const data = await response.json();
+
+    if (data.status === 'success' && data.listings.length > 0) {
+      const html = data.listings
+        .filter(l => l.seller_id === CURRENT_USER && l.status === 'active')
+        .map(listing => `
+          <div style="background:var(--vault-2); padding:15px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:bold;">${listing.card_name}</div>
+              <div style="font-size:12px; color:var(--mist);">R$ ${listing.price.toFixed(2)}</div>
+            </div>
+            <button onclick="deleteListing('${listing.id}')" style="padding:8px 15px; background:#ff6b6b; color:white; border:none; border-radius:5px; cursor:pointer;">
+              X
+            </button>
+          </div>
+        `).join('');
+      document.getElementById('my-listings-list').innerHTML = html;
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+  }
+}
+
+async function deleteListing(listingId) {
+  try {
+    const response = await fetch(`/api/marketplace/listings/${listingId}`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      loadMyListings();
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+  }
+}
+
+async function loadHistory() {
+  try {
+    const response = await fetch(`/api/marketplace/trades/${CURRENT_USER}`);
+    const data = await response.json();
+
+    if (data.status === 'success' && data.trades.length > 0) {
+      const html = data.trades.map(trade => `
+        <div style="background:var(--vault-2); padding:15px; border-radius:10px;">
+          <div style="font-weight:bold;">Trade #${trade.id.substring(0, 8)}</div>
+          <div style="font-size:12px; color:var(--mist); margin-top:5px;">Status: ${trade.status}</div>
+          <div style="font-size:12px; color:var(--mist);">Data: ${new Date(trade.created_at).toLocaleDateString('pt-BR')}</div>
+          ${trade.amount ? `<div style="font-size:12px; color:var(--champagne); margin-top:5px; font-weight:bold;">R$ ${trade.amount.toFixed(2)}</div>` : ''}
+        </div>
+      `).join('');
+      document.getElementById('history-list').innerHTML = html;
+    }
+  } catch (error) {
+    console.error('Erro:', error);
+  }
+}
+
+function searchCard(cardName) {
+  document.getElementById('search-card').value = cardName;
+  showMarketTab('explore');
+}
+
+function initMarketplace() {
+  document.getElementById('marketplace-page').style.display = 'block';
+  loadTrending();
+  loadDeals();
+  loadListings();
+}
+</script>

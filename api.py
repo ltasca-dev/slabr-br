@@ -13,6 +13,7 @@ from flask import Flask, jsonify, request, g, session, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from scraper_bynx import BynxScraperSync
 from portfolio_routes import portfolio_bp
+from marketplace_routes import marketplace_bp
 
 DB   = os.environ.get("SLABR_DB", "pokemon_catalog.db")
 HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "slabr_app.html")
@@ -557,8 +558,9 @@ def bynx_health_check():
     except Exception as e:
         return jsonify({"status": "unhealthy", "error": str(e)}), 503
 
-# Registrar blueprint Fase 1: Portfolio Manager
+# Registrar blueprints Fase 1
 app.register_blueprint(portfolio_bp)
+app.register_blueprint(marketplace_bp)
 
 # roda a migração no import também (deploys com gunicorn não executam o bloco __main__)
 migrate_and_seed()
