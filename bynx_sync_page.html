@@ -1,0 +1,199 @@
+<!-- Bynx Sync - Página de Sincronização -->
+
+<div id="bynx-sync-page" style="display:none; padding: 20px;">
+  <h1>Sincronizar com Bynx.gg</h1>
+
+  <div id="sync-not-connected" style="display:block;">
+    <div style="background:var(--vault-2); padding:30px; border-radius:10px; text-align:center; max-width:500px; margin:40px auto;">
+      <h2 style="color:var(--champagne); font-size:24px; margin-bottom:20px;">Conectar ao Bynx.gg</h2>
+
+      <p style="color:var(--mist); margin-bottom:30px;">
+        Sincronize sua coleção SLABR com sua conta Bynx.gg.
+        Assim sua coleção fica sincronizada nos dois sites!
+      </p>
+
+      <div style="background:var(--vault); padding:20px; border-radius:10px; margin-bottom:30px; text-align:left;">
+        <h3 style="color:var(--champagne); font-size:14px; margin-bottom:15px;">Beneficios da sincronizacao:</h3>
+        <ul style="color:var(--mist); font-size:13px; line-height:1.8;">
+          <li>✓ Sua coleção atualizada em ambos os sites</li>
+          <li>✓ Receba notificacoes de mudancas de preco</li>
+          <li>✓ Venda em SLABR ou Bynx, tudo sincronizado</li>
+          <li>✓ Dashboard unificado de seu portfolio</li>
+          <li>✓ Alertas de preco automáticos</li>
+        </ul>
+      </div>
+
+      <button onclick="connectBynx()" style="padding:15px 40px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer; font-weight:bold; font-size:16px; width:100%;">
+        🔗 Conectar com Bynx.gg
+      </button>
+
+      <p style="color:var(--mist); font-size:12px; margin-top:20px;">
+        Você sera redirecionado para Bynx.gg para autorizar a conexao
+      </p>
+    </div>
+  </div>
+
+  <div id="sync-connected" style="display:none;">
+    <div style="background:#d4edda; padding:20px; border-radius:10px; margin-bottom:30px; border-left:4px solid #28a745;">
+      <div style="color:#155724; font-weight:bold; margin-bottom:10px;">✓ Conectado com sucesso!</div>
+      <div style="color:#155724; font-size:12px;">Sua coleção esta sincronizada com Bynx.gg</div>
+    </div>
+
+    <!-- Status de sincronizacao -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:30px;">
+      <div style="background:var(--vault-2); padding:20px; border-radius:10px; border-left:4px solid var(--champagne);">
+        <div style="color:var(--mist); font-size:12px;">Cartas sincronizadas</div>
+        <div style="font-size:32px; font-weight:bold; color:var(--champagne);" id="sync-count">0</div>
+      </div>
+
+      <div style="background:var(--vault-2); padding:20px; border-radius:10px; border-left:4px solid var(--champagne);">
+        <div style="color:var(--mist); font-size:12px;">Ultima sincronizacao</div>
+        <div style="font-size:14px; color:var(--champagne); font-weight:bold;" id="last-sync">Nunca</div>
+      </div>
+    </div>
+
+    <!-- Acoes -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:30px;">
+      <button onclick="syncNow()" style="padding:15px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+        🔄 Sincronizar Agora
+      </button>
+
+      <button onclick="showNotifications()" style="padding:15px; background:var(--vault-2); color:var(--champagne); border:1px solid var(--line); border-radius:5px; cursor:pointer; font-weight:bold;">
+        🔔 Notificacoes
+      </button>
+    </div>
+
+    <!-- Notificacoes -->
+    <h3>Notificacoes do Bynx</h3>
+    <div id="notifications-list" style="display:grid; gap:15px;">
+      <p style="color:var(--mist);">Nenhuma notificacao</p>
+    </div>
+
+    <!-- Desconectar -->
+    <div style="margin-top:40px; padding-top:20px; border-top:1px solid var(--line);">
+      <button onclick="disconnectBynx()" style="padding:10px 20px; background:#ff6b6b; color:white; border:none; border-radius:5px; cursor:pointer; font-size:12px;">
+        ✕ Desconectar do Bynx.gg
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Bynx Sync Functions
+
+const CURRENT_USER = 'leonardo'; // TODO: Pegar do login real
+
+async function checkBynxStatus() {
+  try {
+    const response = await fetch(`/api/bynx-sync/status/${CURRENT_USER}`);
+    const data = await response.json();
+
+    if (data.connected) {
+      document.getElementById('sync-not-connected').style.display = 'none';
+      document.getElementById('sync-connected').style.display = 'block';
+      document.getElementById('sync-count').textContent = data.synced_cards || 0;
+      document.getElementById('last-sync').textContent = data.last_sync ? new Date(data.last_sync).toLocaleDateString('pt-BR') : 'Nunca';
+      loadNotifications();
+    } else {
+      document.getElementById('sync-not-connected').style.display = 'block';
+      document.getElementById('sync-connected').style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Erro ao verificar status:', error);
+  }
+}
+
+async function connectBynx() {
+  try {
+    const response = await fetch('/api/bynx-sync/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: CURRENT_USER })
+    });
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      // Redirecionar para Bynx OAuth
+      window.location.href = data.oauth_url;
+    }
+  } catch (error) {
+    console.error('Erro ao conectar:', error);
+    alert('Erro ao conectar com Bynx.gg');
+  }
+}
+
+async function syncNow() {
+  try {
+    const response = await fetch(`/api/bynx-sync/sync/${CURRENT_USER}`, {
+      method: 'POST'
+    });
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      alert(`Sincronizacao completa! ${data.synced_cards} cartas sincronizadas`);
+      checkBynxStatus();
+    }
+  } catch (error) {
+    console.error('Erro ao sincronizar:', error);
+    alert('Erro ao sincronizar');
+  }
+}
+
+async function loadNotifications() {
+  try {
+    const response = await fetch(`/api/bynx-sync/notifications/${CURRENT_USER}`);
+    const data = await response.json();
+
+    if (data.status === 'success' && data.notifications.length > 0) {
+      const html = data.notifications.map(notif => `
+        <div style="background:var(--vault-2); padding:15px; border-radius:10px;">
+          <div style="font-weight:bold; font-size:14px;">
+            ${notif.event_type === 'price_change' ? 'Mudanca de Preco' : notif.event_type}
+          </div>
+          <div style="font-size:12px; color:var(--mist); margin-top:5px;">
+            ${notif.card_id}
+          </div>
+          ${notif.old_price ? `
+            <div style="font-size:12px; color:var(--mist); margin-top:5px;">
+              R$ ${parseFloat(notif.old_price).toFixed(2)} → R$ ${parseFloat(notif.new_price).toFixed(2)}
+            </div>
+          ` : ''}
+          <div style="font-size:11px; color:var(--mist); margin-top:8px;">
+            ${new Date(notif.created_at).toLocaleDateString('pt-BR')}
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('notifications-list').innerHTML = html;
+    }
+  } catch (error) {
+    console.error('Erro ao carregar notificacoes:', error);
+  }
+}
+
+function showNotifications() {
+  loadNotifications();
+}
+
+async function disconnectBynx() {
+  if (!confirm('Tem certeza que deseja desconectar do Bynx.gg?')) return;
+
+  try {
+    const response = await fetch(`/api/bynx-sync/disconnect/${CURRENT_USER}`, {
+      method: 'POST'
+    });
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      alert('Desconectado do Bynx.gg');
+      checkBynxStatus();
+    }
+  } catch (error) {
+    console.error('Erro ao desconectar:', error);
+  }
+}
+
+function initBynxSync() {
+  document.getElementById('bynx-sync-page').style.display = 'block';
+  checkBynxStatus();
+}
+</script>

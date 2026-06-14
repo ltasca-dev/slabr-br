@@ -14,6 +14,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from scraper_bynx import BynxScraperSync
 from portfolio_routes import portfolio_bp
 from marketplace_routes import marketplace_bp
+from bynx_sync_routes import bynx_sync_bp
 
 DB   = os.environ.get("SLABR_DB", "pokemon_catalog.db")
 HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "slabr_app.html")
@@ -561,6 +562,7 @@ def bynx_health_check():
 # Registrar blueprints Fase 1
 app.register_blueprint(portfolio_bp)
 app.register_blueprint(marketplace_bp)
+app.register_blueprint(bynx_sync_bp)
 
 # roda a migração no import também (deploys com gunicorn não executam o bloco __main__)
 migrate_and_seed()
