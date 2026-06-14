@@ -1,0 +1,49 @@
+SLABR.br rodando em http://127.0.0.1:5000
+ * Serving Flask app 'api'
+ * Debug mode: on
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 401-698-631
+INFO:scraper_bynx:Buscando (fallback): Charizard
+ERROR:scraper_bynx:Erro no fallback: name 'requests' is not defined
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2026 13:09:59] "[35m[1mGET /api/prices/bynx/health HTTP/1.1[0m" 503 -
+INFO:scraper_bynx:Buscando (fallback): Charizard
+ERROR:scraper_bynx:Erro no fallback: name 'requests' is not defined
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2026 13:09:59] "[33mGET /api/prices/bynx/base1-4 HTTP/1.1[0m" 404 -
+INFO:scraper_bynx:Buscando (fallback): Charizard
+ERROR:scraper_bynx:Erro no fallback: name 'requests' is not defined
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2026 13:10:00] "GET /api/prices/bynx/compare/base1-4 HTTP/1.1" 200 -
+INFO:werkzeug: * Detected change in 'C:\\Users\\ltasca\\Documents\\Slab\\slabr-br\\scraper_bynx.py', reloading
+SLABR.br rodando em http://127.0.0.1:5000
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 401-698-631
+INFO:werkzeug: * Detected change in 'C:\\Users\\ltasca\\Documents\\Slab\\slabr-br\\scraper_bynx.py', reloading
+SLABR.br rodando em http://127.0.0.1:5000
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 401-698-631
+INFO:werkzeug: * Detected change in 'C:\\Users\\ltasca\\Documents\\Slab\\slabr-br\\test_scraper_20cartas.py', reloading
+SLABR.br rodando em http://127.0.0.1:5000
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 401-698-631
+INFO:werkzeug: * Detected change in 'C:\\Users\\ltasca\\Documents\\Slab\\slabr-br\\scraper_bynx.py', reloading
+SLABR.br rodando em http://127.0.0.1:5000
+INFO:werkzeug: * Restarting with stat
+INFO:scraper_bynx:\u2713 Mock service carregado para fallback
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 401-698-631
+ERROR:scraper_bynx:Erro ao buscar: name 'requests' is not defined
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2026 13:25:10] "GET /api/prices/bynx/health HTTP/1.1" 200 -
+ERROR:scraper_bynx:Erro ao buscar: name 'requests' is not defined
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2026 13:25:10] "GET /api/prices/bynx/base1-4 HTTP/1.1" 200 -
+ERROR:scraper_bynx:Erro ao buscar: name 'requests' is not defined
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2026 13:25:14] "GET /api/prices/bynx/health HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2026 13:25:14] "GET /api/prices/bynx/base1-4 HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2026 13:25:17] "GET /api/prices/bynx/base1-4 HTTP/1.1" 200 -
+ERROR:scraper_bynx:Erro ao buscar: name 'requests' is not defined
+INFO:werkzeug:127.0.0.1 - - [14/Jun/2026 13:25:18] "GET /api/prices/bynx/base1-25 HTTP/1.1" 200 -

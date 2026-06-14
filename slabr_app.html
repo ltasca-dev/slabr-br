@@ -1,0 +1,775 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SLABR.br — figurinhas e cards graduados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Inter:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+ --vault:#0c0f13;--vault-2:#13171e;--vault-3:#1a1f28;
+ --ice:#eef2f7;--mist:#97a1b0;--mist-dim:#586273;
+ --champagne:#e7c47a;--champagne-dim:#c79a4e;
+ --line:rgba(255,255,255,.07);--line-strong:rgba(255,255,255,.14);
+ --ok:#4ade80;--bad:#f87171;--grass:#22c55e;
+ --gem:linear-gradient(110deg,#6ee7d6,#a78bfa,#f0abfc,#fbbf24,#6ee7d6);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--ice);min-height:100vh;-webkit-font-smoothing:antialiased;
+ background:radial-gradient(1200px 620px at 70% -8%,rgba(120,140,180,.12),transparent 58%),radial-gradient(760px 420px at 12% 8%,rgba(231,196,122,.06),transparent 56%),var(--vault);background-attachment:fixed}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.muted{color:var(--mist)} .mono{font-family:'Space Mono'}
+@keyframes holo{to{background-position:200% 50%}}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+header{position:sticky;top:0;z-index:40;backdrop-filter:blur(16px);background:linear-gradient(to bottom,rgba(12,15,19,.94),rgba(12,15,19,.66));border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:26px;height:66px}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;letter-spacing:-.02em}
+.brand .mk{width:26px;height:26px;border-radius:7px;background:var(--gem);background-size:200% 200%;animation:holo 6s linear infinite;box-shadow:0 0 16px rgba(167,139,250,.4)}
+nav.menu{display:flex;gap:22px}
+nav.menu a{color:var(--mist);font-size:14px;font-weight:500;padding:4px 0;border-bottom:2px solid transparent;cursor:pointer}
+nav.menu a:hover{color:var(--ice)} nav.menu a.on{color:var(--ice);border-bottom-color:var(--champagne)}
+.authbtns{margin-left:auto;display:flex;align-items:center;gap:10px}
+.lnk{font-size:14px;font-weight:500;color:var(--mist);padding:9px 12px;border-radius:9px;cursor:pointer}.lnk:hover{color:var(--ice)}
+.cta{font-size:14px;font-weight:600;color:#10141a;background:var(--champagne);padding:10px 16px;border-radius:9px;border:none;cursor:pointer;transition:transform .12s}.cta:hover{transform:translateY(-1px)}
+.cta.ghost{background:transparent;color:var(--ice);border:1px solid var(--line-strong)}
+.userchip{display:flex;align-items:center;gap:9px;cursor:pointer;background:var(--vault-2);border:1px solid var(--line-strong);padding:6px 12px 6px 6px;border-radius:999px}
+.userchip .uav{width:28px;height:28px;border-radius:50%;background:linear-gradient(145deg,#2a3340,#11151b);display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:13px;color:var(--champagne)}
+.userchip span{font-size:13px;font-weight:600}
+#app{animation:fade .35s ease;padding-bottom:10px}
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;padding:64px 0 46px}
+.eyebrow{font-family:'Space Mono';font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--champagne);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.hero h1{font-family:'Bricolage Grotesque';font-weight:800;font-size:clamp(38px,5.4vw,58px);line-height:1.0;letter-spacing:-.035em}
+.hero h1 em{font-style:normal;background:var(--gem);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:holo 7s linear infinite}
+.hero p.sub{color:var(--mist);font-size:17px;line-height:1.55;margin:20px 0 26px;max-width:470px}
+.heroctas{display:flex;gap:12px;flex-wrap:wrap}.heroctas .big{font-size:15px;padding:14px 22px}
+.trustline{display:flex;gap:24px;margin-top:28px;flex-wrap:wrap}
+.trustline div{font-size:13px;color:var(--mist)} .trustline b{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;color:var(--ice);display:block}
+.stage{perspective:1300px;display:grid;place-items:center}
+.fslab{--rx:0deg;--ry:0deg;--pos:50% 50%;--mx:50%;--my:50%;width:288px;border-radius:18px;padding:11px 11px 30px;position:relative;
+ background:linear-gradient(160deg,rgba(243,245,248,.16),rgba(120,130,145,.07));border:1px solid var(--line-strong);
+ transform:rotateX(var(--rx)) rotateY(var(--ry));transition:transform .15s ease;box-shadow:0 36px 70px rgba(0,0,0,.55)}
+.fslab.rest{transition:transform 1s cubic-bezier(.2,.8,.2,1);animation:float 7s ease-in-out infinite}
+@keyframes float{0%,100%{transform:rotateX(5deg) rotateY(-7deg)}50%{transform:rotateX(-3deg) rotateY(7deg)}}
+.fslab .lab{display:flex;justify-content:space-between;align-items:center;padding:2px 5px 9px}
+.fslab .br{font-family:'Bricolage Grotesque';font-weight:800;font-size:12px;color:var(--ice)}
+.fslab .gr{font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;color:#10141a;padding:5px 11px;border-radius:7px;background:var(--gem);background-size:200% 200%;animation:holo 5s linear infinite;box-shadow:0 0 14px rgba(251,191,36,.5)}
+.fslab .gr small{display:block;font-family:'Space Mono';font-size:6.5px;letter-spacing:.1em}
+.fart{border-radius:11px;aspect-ratio:5/7;overflow:hidden;position:relative;border:1px solid rgba(0,0,0,.2)}
+.fart .base{position:absolute;inset:0;background:linear-gradient(165deg,#0b3d1f,#06351b 55%,#04160c)}
+.fart .base::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 26px,rgba(255,255,255,.045) 26px 52px),radial-gradient(60% 42% at 50% 78%,rgba(231,196,122,.3),transparent)}
+.fart .num{position:absolute;inset:0;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:80px;color:rgba(255,255,255,.92);text-shadow:0 3px 14px rgba(0,0,0,.5)}
+.fart .nm{position:absolute;bottom:0;left:0;right:0;padding:12px;color:#fff;font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;background:linear-gradient(to top,rgba(0,0,0,.82),transparent);text-shadow:0 1px 3px #000}
+.fart .nm small{display:block;font-family:Inter;font-weight:500;font-size:10px;opacity:.85;margin-top:2px}
+.fart .holo{position:absolute;inset:0;mix-blend-mode:color-dodge;opacity:.5;background:repeating-linear-gradient(115deg,rgba(255,119,115,.4)0%,rgba(255,237,95,.4)12%,rgba(95,255,237,.4)24%,rgba(115,135,255,.4)36%,rgba(255,119,221,.4)48%,rgba(255,119,115,.4)60%);background-size:200% 200%;background-position:var(--pos)}
+.fart .glare{position:absolute;inset:0;mix-blend-mode:overlay;opacity:.75;background:radial-gradient(circle at var(--mx) var(--my),rgba(255,255,255,.6),transparent 42%)}
+.fslab .cert{font-family:'Space Mono';font-size:8px;color:var(--mist);text-align:center;padding-top:9px}
+.sec{padding:30px 0}
+.sec-h{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:16px;flex-wrap:wrap}
+.sec-h h2{font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;letter-spacing:-.02em}
+.sec-h p{color:var(--mist);font-size:14px;margin-top:4px}
+.sec-h a{font-size:13.5px;color:var(--champagne);font-weight:600;white-space:nowrap;cursor:pointer}
+.feats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.feat{background:var(--vault-2);border:1px solid var(--line);border-radius:14px;padding:22px;transition:.2s}
+.feat:hover{border-color:var(--line-strong);transform:translateY(-3px)}
+.feat .ic{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:18px;background:rgba(231,196,122,.1);border:1px solid var(--line-strong);margin-bottom:14px}
+.feat h3{font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;margin-bottom:6px}.feat p{font-size:13px;color:var(--mist);line-height:1.5}
+.ad{border:1px dashed var(--line-strong);border-radius:14px;background:repeating-linear-gradient(135deg,rgba(255,255,255,.02) 0 12px,transparent 12px 24px),var(--vault-2);display:flex;align-items:center;justify-content:center;gap:12px;padding:26px;text-align:center}
+.ad .tag{font-family:'Space Mono';font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mist-dim);border:1px solid var(--line);padding:4px 8px;border-radius:6px}
+.ad .txt{color:var(--mist);font-size:13.5px} .ad.banner{min-height:96px}
+footer{border-top:1px solid var(--line);margin-top:40px;padding:34px 0}
+.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--mist-dim);font-size:13px}
+.foot a{color:var(--mist);cursor:pointer}.foot a:hover{color:var(--ice)}
+.searchbox{display:flex;gap:10px;max-width:560px;background:var(--vault-2);border:1px solid var(--line-strong);border-radius:14px;padding:8px}
+.searchbox:focus-within{border-color:var(--champagne-dim)}
+.searchbox input{flex:1;background:none;border:none;outline:none;color:var(--ice);font-family:'Space Mono';font-size:15px;padding:11px 13px}
+.searchbox input::placeholder{color:var(--mist-dim)}
+.searchbox button{background:var(--champagne);color:#10141a;border:none;border-radius:9px;padding:0 20px;font-weight:600;cursor:pointer}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chip{font-family:'Space Mono';font-size:12px;color:var(--mist);background:var(--vault-2);border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer}
+.chip:hover{color:var(--ice);border-color:var(--line-strong)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:20px}
+.item{cursor:pointer;transition:transform .2s}.item:hover{transform:translateY(-4px)}
+.illus{aspect-ratio:5/7;border-radius:13px;padding:9px;position:relative;overflow:hidden;border:2px solid rgba(255,255,255,.14);box-shadow:0 12px 28px rgba(0,0,0,.4)}
+.illus .bg{position:absolute;inset:0}.illus .grain{position:absolute;inset:0;mix-blend-mode:overlay;opacity:.22;background-image:radial-gradient(circle at 30% 20%,rgba(255,255,255,.5),transparent 40%),radial-gradient(circle at 70% 80%,rgba(0,0,0,.5),transparent 45%)}
+.illus .holo{position:absolute;inset:0;mix-blend-mode:color-dodge;opacity:0;background:repeating-linear-gradient(115deg,rgba(255,119,115,.4)0%,rgba(255,237,95,.4)12%,rgba(95,255,237,.4)24%,rgba(115,135,255,.4)36%,rgba(255,119,221,.4)48%,rgba(255,119,115,.4)60%);background-size:200% 200%}
+.illus.rare .holo{opacity:.5;animation:holo 5s linear infinite}
+.illus .nm{position:relative;z-index:2;font-family:'Bricolage Grotesque';font-weight:800;font-size:14px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.illus .emblem{position:absolute;inset:0;z-index:2;display:grid;place-items:center}.illus .emblem span{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;color:rgba(255,255,255,.92);background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.35);text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.illus .pop{position:absolute;z-index:2;bottom:8px;left:8px;right:8px;display:flex;justify-content:flex-end}
+.illus .popbadge{font-family:'Space Mono';font-size:9px;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.3);padding:3px 7px;border-radius:6px;color:#fff}
+.illus .figlock{position:absolute;top:8px;left:8px;z-index:3;font-family:'Space Mono';font-size:9px;color:#fff;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.25);padding:3px 7px;border-radius:6px}
+.cap{margin-top:8px}.cap .cn{font-weight:600;font-size:13.5px}.cap .cm{font-family:'Space Mono';font-size:10px;color:var(--mist);margin-top:2px}
+.figmeta{display:flex;justify-content:space-between;align-items:center;margin-top:9px}
+.figmeta .pr{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px}.figmeta .se{font-family:'Space Mono';font-size:10px;color:var(--mist)}
+.two{display:grid;grid-template-columns:1fr 300px;gap:34px;align-items:start;padding-top:6px}
+.section-h{display:flex;align-items:baseline;justify-content:space-between;margin:26px 0 14px}.section-h span{font-size:13px;color:var(--mist)}
+.section-h h2{font-family:'Bricolage Grotesque';font-weight:800;letter-spacing:-.02em}
+.back{font-family:'Space Mono';font-size:12px;color:var(--mist);cursor:pointer;margin-bottom:14px;display:inline-block}.back:hover{color:var(--ice)}
+.det h2{font-size:26px;font-family:'Bricolage Grotesque';font-weight:800;letter-spacing:-.02em}.det .sub{color:var(--mist);font-size:14px;margin:6px 0 8px}
+.vbadge{display:inline-block;font-family:'Space Mono';font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--champagne);border:1px solid var(--champagne-dim);background:rgba(231,196,122,.07);padding:4px 9px;border-radius:6px;margin-bottom:8px}
+.status{display:flex;align-items:center;gap:10px;font-family:'Space Mono';font-size:13px;padding:12px 16px;border-radius:10px;margin-bottom:18px}
+.status.ok{color:var(--ok);background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25)}
+.status.bad{color:var(--bad);background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25)}
+.status .dot{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+.offers{display:flex;flex-direction:column;gap:10px}
+.offer{display:grid;grid-template-columns:42px 1fr auto auto;gap:13px;align-items:center;background:var(--vault-2);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+.offer:hover{border-color:var(--line-strong)}
+.oslab{width:42px;height:58px;border-radius:6px;position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.3)}
+.oslab .g{position:absolute;top:3px;left:3px;font-family:'Bricolage Grotesque';font-weight:800;font-size:9px;color:#10141a;background:#e2e8f0;padding:1px 4px;border-radius:4px}
+.oslab .g.gem{background:var(--gem);background-size:200% 200%;animation:holo 5s linear infinite}
+.oinfo .gr{font-family:'Bricolage Grotesque';font-weight:800;font-size:15px}.oinfo .gr .gt{font-family:'Space Mono';font-size:8px;color:var(--champagne);margin-left:5px;letter-spacing:.06em}
+.oinfo .se{font-size:12px;color:var(--mist);margin-top:3px}.oinfo .se a{color:var(--champagne-dim)}
+.oinfo .ce{font-family:'Space Mono';font-size:9px;color:var(--mist-dim);margin-top:2px}
+.op{text-align:right}.op .p{font-family:'Bricolage Grotesque';font-weight:800;font-size:16px}.op .s{font-family:'Space Mono';font-size:9px;color:var(--mist-dim)}
+.add{background:var(--champagne);color:#10141a;border:none;border-radius:9px;padding:9px 13px;font-weight:600;font-size:12.5px;cursor:pointer}
+.add.added{background:var(--vault-3);color:var(--ok);border:1px solid rgba(74,222,128,.3)}
+.sectit{font-family:'Space Mono';font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--champagne);margin-bottom:10px}
+.popbars{display:flex;flex-direction:column;gap:8px;background:var(--vault-2);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+.pb{display:grid;grid-template-columns:54px 1fr 36px;align-items:center;gap:10px;font-family:'Space Mono';font-size:11px}
+.pb .lab{color:var(--mist)}.pb .track{height:7px;background:var(--vault-3);border-radius:4px;overflow:hidden}.pb .fill{height:100%;background:var(--mist-dim);border-radius:4px}
+.slab{border-radius:12px;background:linear-gradient(160deg,#f3f5f8,#d3d9e0);padding:9px 9px 11px;box-shadow:0 18px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.9)}
+.slab-top{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 8px}
+.slab-brand{font-family:'Bricolage Grotesque';font-weight:800;font-size:12px;color:#10141a}
+.grade{font-family:'Bricolage Grotesque';font-weight:800;font-size:16px;padding:5px 9px;border-radius:7px;color:#10141a;background:#cfd6de;text-align:center}
+.grade.gem{background:var(--gem);background-size:200% 200%;animation:holo 5s linear infinite;box-shadow:0 0 14px rgba(251,191,36,.5)}
+.grade .lb{display:block;font-family:'Space Mono';font-size:6px;letter-spacing:.1em;margin-top:2px}
+.window{border-radius:8px;aspect-ratio:5/7;overflow:hidden;position:relative;display:grid;place-items:center;border:1px solid rgba(0,0,0,.15)}
+.window .nm{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:9px;color:#fff;font-family:'Bricolage Grotesque';font-weight:800;font-size:13px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.window .nm small{display:block;font-family:Inter;font-weight:500;font-size:9px;opacity:.85;margin-top:2px}
+.window .em{position:absolute;inset:0;display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:30px;color:rgba(255,255,255,.9);z-index:1}
+.scan-note{font-family:'Space Mono';font-size:8px;color:#5b6472;text-align:center;padding:8px 4px 2px}
+.cert-layout{display:grid;grid-template-columns:200px 1fr;gap:28px;align-items:start}
+.subgrades{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:11px;overflow:hidden;margin-bottom:16px}
+.sg{background:var(--vault-2);padding:11px 12px}.sg .k{font-family:'Space Mono';font-size:9px;text-transform:uppercase;color:var(--mist-dim);margin-bottom:5px}.sg .v{font-family:'Bricolage Grotesque';font-weight:800;font-size:18px}
+.meta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.mc{background:var(--vault-2);padding:11px 15px}.mc .k{font-family:'Space Mono';font-size:9px;text-transform:uppercase;color:var(--mist-dim);margin-bottom:4px}.mc .v{font-size:14px;font-weight:600}.mc .v.gold{font-family:'Bricolage Grotesque';font-weight:800;color:var(--champagne);font-size:16px}.mc .v a{color:var(--champagne)}
+.hero-c{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;padding:30px 0 6px}
+.avatar{width:84px;height:84px;border-radius:20px;background:linear-gradient(145deg,#2a3340,#11151b);border:1px solid var(--line-strong);display:grid;place-items:center;font-family:'Bricolage Grotesque';font-weight:800;font-size:32px;color:var(--champagne);flex-shrink:0}
+.hero-c h2{font-family:'Bricolage Grotesque';font-weight:800;letter-spacing:-.02em}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:999px;border:1px solid var(--line-strong);background:var(--vault-2);cursor:pointer}
+.badge.rank{border-color:var(--champagne-dim);color:var(--champagne);background:rgba(231,196,122,.07)}
+.section-h h2{font-size:18px}
+.toggle{display:flex;align-items:center;justify-content:space-between;margin-top:9px;background:var(--vault-2);border:1px solid var(--line);border-radius:10px;padding:8px 11px}
+.toggle .tlbl{font-size:12px;font-weight:600;display:flex;align-items:center;gap:7px}.toggle .tlbl .d{width:8px;height:8px;border-radius:50%}
+.toggle .tlbl.pub .d{background:var(--grass);box-shadow:0 0 7px var(--grass)}.toggle .tlbl.pub{color:var(--ice)}
+.toggle .tlbl.prv .d{background:var(--mist-dim)}.toggle .tlbl.prv{color:var(--mist)}
+.sw{width:38px;height:22px;border-radius:999px;background:var(--vault-3);border:1px solid var(--line-strong);position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--mist);transition:.2s}
+.sw.on{background:rgba(34,197,94,.25);border-color:var(--grass)}.sw.on::after{transform:translateX(16px);background:var(--grass)}
+.addtile{aspect-ratio:5/7;border:1.5px dashed var(--line-strong);border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;color:var(--mist);transition:.2s}.addtile:hover{border-color:var(--champagne-dim);color:var(--ice)}
+.addtile .plus{font-size:28px;font-family:'Bricolage Grotesque'}
+.authpage{max-width:440px;margin:46px auto;padding-bottom:50px}
+.card-box{background:var(--vault-2);border:1px solid var(--line-strong);border-radius:18px;padding:30px}
+.card-box h1{font-family:'Bricolage Grotesque';font-weight:800;font-size:25px;letter-spacing:-.02em;margin-bottom:6px}
+.card-box .s{color:var(--mist);font-size:14px;margin-bottom:22px}
+label{display:block;font-size:12.5px;color:var(--mist);margin:14px 0 6px}
+input,select{width:100%;background:var(--vault-3);border:1px solid var(--line);color:var(--ice);border-radius:10px;padding:11px 13px;font-family:Inter;font-size:14px;outline:none}
+input:focus,select:focus{border-color:var(--champagne-dim)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.btn{display:inline-block;background:var(--champagne);color:#10141a;border:none;border-radius:10px;padding:12px 18px;font-weight:600;font-size:14px;cursor:pointer;transition:transform .12s}.btn:hover{transform:translateY(-1px)}
+.btn-full{width:100%;margin-top:20px;padding:14px;font-size:15px;font-weight:600;color:#10141a;background:var(--champagne);border:none;border-radius:11px;cursor:pointer;transition:transform .12s}.btn-full:hover{transform:translateY(-1px)}
+.swap{text-align:center;margin-top:16px;font-size:13.5px;color:var(--mist)}.swap a{color:var(--champagne);font-weight:600;cursor:pointer}
+.hint{font-size:11.5px;color:var(--mist-dim);margin-top:6px}.formerr{color:var(--bad);font-size:13px;margin-top:12px;min-height:1px}
+.sec-form{margin-bottom:20px}
+.results{position:absolute;top:100%;left:0;right:0;background:var(--vault-2);border:1px solid var(--line-strong);border-radius:10px;margin-top:6px;max-height:240px;overflow:auto;z-index:5;display:none}
+.results.on{display:block}.res{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line);font-size:13px}.res:hover{background:var(--vault-3)}.res .rm{font-family:'Space Mono';font-size:10px;color:var(--mist)}
+.selbox{background:var(--vault-2);border:1px solid var(--champagne-dim);border-radius:10px;padding:11px 14px;display:none;align-items:center;justify-content:space-between;margin-top:10px}.selbox.on{display:flex}
+.drop{border:1.5px dashed var(--line-strong);border-radius:10px;padding:16px;text-align:center;cursor:pointer;font-size:12.5px;color:var(--mist)}.drop:hover{border-color:var(--champagne-dim)}.drop.has{border-style:solid;border-color:var(--ok);color:var(--ok)}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--vault-2);border:1px solid var(--grass);color:var(--ice);padding:13px 19px;border-radius:12px;z-index:60;display:none;align-items:center;gap:10px;box-shadow:0 14px 40px rgba(0,0,0,.5);max-width:90%}
+.toast.on{display:flex}.toast .d{width:8px;height:8px;border-radius:50%;background:var(--grass);box-shadow:0 0 8px var(--grass)}.toast a{color:var(--champagne);font-weight:600;margin-left:6px}
+@media(max-width:880px){.hero{grid-template-columns:1fr;gap:28px;padding:42px 0 28px}.stage{order:-1}.feats{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.cert-layout{grid-template-columns:1fr}nav.menu{display:none}.burger{display:block}.authbtns{display:none}.mobilemenu{position:fixed;top:66px;left:0;right:0;background:var(--vault-2);border-bottom:1px solid var(--line-strong);flex-direction:column;padding:10px;gap:2px;z-index:39;box-shadow:0 22px 44px rgba(0,0,0,.55)}.mobilemenu.open{display:flex}.offer{grid-template-columns:38px 1fr auto}.offer .add{grid-column:1/-1;width:100%;margin-top:4px}}
+.burger{display:none;background:var(--vault-2);border:1px solid var(--line-strong);color:var(--ice);font-size:18px;width:42px;height:38px;border-radius:9px;cursor:pointer}
+.mobilemenu{display:none}
+.price-panel{display:grid;grid-template-columns:290px 1fr;gap:24px;background:var(--vault-2);border:1px solid var(--line);border-radius:14px;padding:20px}
+.pp-stats{display:flex;flex-direction:column}
+.pp-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.pp-row:last-child{border-bottom:none}.pp-row span{color:var(--mist)}.pp-row b{font-weight:600;text-align:right}
+.pp-row.gold b{font-family:'Bricolage Grotesque';font-weight:800;color:var(--champagne);font-size:17px}
+.pp-chart{min-width:0}
+.pp-legend{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--mist);margin-top:4px}
+.pp-legend .dotc{width:14px;height:3px;border-radius:2px;background:var(--champagne);display:inline-block}
+.pp-cap{font-size:10.5px;color:var(--mist-dim);margin-top:6px;line-height:1.4}
+@media(max-width:880px){.price-panel{grid-template-columns:1fr}}
+.attr{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line)}
+.attr:last-child{border-bottom:none}.attr span{color:var(--mist)}.attr b{font-weight:600;text-align:right}
+.grdbtn{display:block;text-align:center;margin-top:8px;padding:9px;border-radius:9px;font-size:12.5px;font-weight:600;color:var(--champagne);border:1px solid var(--champagne-dim);background:rgba(231,196,122,.07);cursor:pointer}
+.grdbtn:hover{background:rgba(231,196,122,.14)}
+.grdtag{margin-top:8px;text-align:center;font-size:11.5px;color:var(--ok);font-family:'Space Mono'}
+.chk{display:flex;gap:11px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.chk:last-of-type{border-bottom:none}
+.chk .box{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--line-strong);flex-shrink:0;display:grid;place-items:center;font-size:13px;color:#10141a;margin-top:1px}
+.chk.on .box{background:var(--grass);border-color:var(--grass)}
+.chk .tx{font-size:13.5px;line-height:1.45}.chk .tx b{font-weight:600}
+.reqrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:var(--vault-2);border:1px solid var(--line);border-radius:11px;padding:12px 15px;margin-bottom:8px}
+.reqrow .pr{font-family:'Space Mono';font-size:11px;color:var(--mist)}
+.reqrow .st{font-size:12px;font-weight:600;color:var(--champagne)}
+.confirm{background:var(--vault-2);border:1px solid rgba(74,222,128,.3);border-radius:16px;padding:28px;text-align:center;max-width:520px;margin:30px auto}
+.confirm .proto{font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;color:var(--champagne);margin:8px 0}
+.mobilemenu a,.mobilemenu .mm-act{display:block;padding:13px 16px;border-radius:10px;font-size:15px;font-weight:600;color:var(--ice);cursor:pointer}
+.mobilemenu a:hover,.mobilemenu .mm-act:hover{background:var(--vault-3)}
+.mobilemenu .mm-sep{height:1px;background:var(--line);margin:6px 4px}
+.mobilemenu .mm-muted{color:var(--mist);font-size:13px;padding:8px 16px 4px;font-weight:500}
+.mobilemenu .mm-cta{background:var(--champagne);color:#10141a;text-align:center}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+@media(max-width:620px){
+ .wrap{padding:0 14px}
+ body{font-size:14px}
+ .bar{height:56px;gap:14px}
+ .brand{font-size:16px;gap:6px}
+ .brand .mk{width:20px;height:20px}
+ nav.menu a{font-size:13px;gap:16px}
+ h1{font-size:clamp(28px,7vw,38px)!important;line-height:1.1}
+ .hero{padding:32px 0 20px}
+ .hero h1{font-size:28px}
+ .hero p.sub{font-size:14px;margin:14px 0 16px}
+ .sec{padding:18px 0}
+ .sec-h h2{font-size:20px;margin-bottom:12px}
+ .feats{grid-template-columns:1fr;gap:12px}
+ .grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+ .illus .nm{font-size:11px;padding:6px}
+ .illus .emblem span{width:56px;height:56px;font-size:18px}
+ .cap .cn{font-size:12px}
+ .figmeta{flex-direction:column;align-items:flex-start;gap:4px;margin-top:6px}
+ .det h2{font-size:20px}
+ .det .sub{font-size:12px}
+ .two{gap:16px;grid-template-columns:1fr;padding-top:0}
+ .cert-layout{gap:16px;grid-template-columns:1fr}
+ .slab{padding:6px 6px 8px}
+ .window{max-width:160px;margin:0 auto}
+ .grade{font-size:14px}
+ .subgrades{grid-template-columns:repeat(2,1fr);gap:0}
+ .sg{padding:8px 10px}
+ .sg .k{font-size:8px}
+ .sg .v{font-size:14px}
+ .meta-grid{grid-template-columns:1fr}
+ .mc{padding:8px 12px}
+ .mc .k{font-size:8px}
+ .mc .v{font-size:12px}
+ .offers{gap:8px}
+ .offer{grid-template-columns:38px 1fr;gap:10px;padding:8px 10px}
+ .offer .add{grid-column:1/-1;width:100%;margin-top:6px;padding:8px;font-size:11px}
+ .oinfo .gr{font-size:13px}
+ .op{text-align:left;font-size:14px}
+ .op .p{font-size:14px}
+ .section-h h2{font-size:16px}
+ .hero-c{gap:14px;padding:20px 0}
+ .avatar{width:64px;height:64px;font-size:24px}
+ .badge{font-size:11px;padding:5px 10px}
+ .toggle{padding:7px 10px;margin-top:8px}
+ .toggle .tlbl{font-size:11px}
+ .authpage{margin:24px auto;padding-bottom:30px}
+ .card-box{border-radius:14px;padding:20px}
+ .card-box h1{font-size:20px}
+ .card-box .s{font-size:13px}
+ .row2{gap:10px}
+ .price-panel{grid-template-columns:1fr;gap:16px;padding:14px;font-size:12px}
+ .pp-row{font-size:12px;padding:7px 0}
+ .pp-row.gold b{font-size:14px}
+ .sectit{font-size:9px;margin-bottom:8px}
+ .popbars{padding:10px 12px;gap:6px}
+ .pb{gap:8px;font-size:10px}
+ .pb .lab{width:50px}
+ .back{font-size:11px;margin-bottom:10px}
+}
+</style></head><body>
+<header><div class="wrap bar">
+ <a class="brand" href="#/"><span class="mk"></span>SLABR<span style="color:var(--mist-dim)">.br</span></a>
+ <nav class="menu">
+  <a href="#/" data-v="">Início</a>
+  <a href="#/mercado" data-v="mercado">Mercado</a>
+  <a href="#/catalogo" data-v="catalogo">Catálogo</a>
+  <a href="#/verificar" data-v="verificar">Verificar</a>
+  <a href="#/adicionar" data-v="adicionar">Adicionar carta</a>
+  <a href="#/espaco" data-v="espaco" id="navEspaco" style="display:none">Minha biblioteca</a>
+ </nav>
+ <span class="authbtns" id="authbtns"></span>
+ <button class="burger" id="burger" aria-label="menu">☰</button>
+</div>
+<div class="mobilemenu" id="mobilemenu"></div></header>
+<div class="wrap"><div id="app"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+async function J(p){try{const r=await fetch('/api'+p);return r.ok?await r.json():null;}catch(e){return null;}}
+async function POST(p,b){try{const r=await fetch('/api'+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return await r.json().catch(()=>null);}catch(e){return null;}}
+const TYPE={Fire:["#ff7a18","#cf1020","#3a0a12"],Water:["#7dd3fc","#2563eb","#0b1f3a"],Grass:["#bef264","#65a30d","#1a2e05"],Lightning:["#fde047","#ca8a04","#3a2e05"],Psychic:["#d8b4fe","#7c3aed","#2a1065"],Fighting:["#fb923c","#9a3412","#3a1505"],Darkness:["#94a3b8","#334155","#0a0f1a"],Metal:["#cbd5e1","#64748b","#1e293b"],Fairy:["#f9a8d4","#db2777","#3a0a24"],Colorless:["#e5e7eb","#9ca3af","#1f2937"]};
+function bg(t){const c=TYPE[t]||TYPE.Colorless;return 'radial-gradient(120% 80% at 50% 25%,'+c[0]+','+c[1]+' 55%,'+c[2]+')';}
+function fmt(g){return String(g).replace('.',',');}
+function brl(v){return 'R$ '+Number(v).toLocaleString('pt-BR');}
+function rare(r){return /Rare|Ultra|Holo|Illustration|Secret/i.test(r||'');}
+function tag(o){return o.graded===false?(o.condition||'crua'):('SLABR '+fmt(o.grade)+(o.gem?' GEM':''));}
+const $=s=>document.querySelector(s);
+function illus(c,extra){const r=rare(c.rar);return '<div class="illus '+(r?'rare':'')+'"><div class="bg" style="background:'+bg(c.type)+'"></div><div class="grain"></div><div class="holo"></div><div class="nm">'+c.name+'</div><div class="emblem"><span>'+c.name[0]+'</span></div>'+(extra||'')+'</div>';}
+function thumb(c,scan,extra){if(!scan)return illus(c,extra);return '<div class="illus"><img src="'+scan+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:7px">'+(extra||'')+'</div>';}
+function genCert(){const a='ABCDEFGHJKLMNP';const d=()=>Math.floor(Math.random()*9)+1;return ''+d()+d()+d()+d()+'-'+a[Math.floor(Math.random()*a.length)]+d()+d()+a[Math.floor(Math.random()*a.length)];}
+let cart=[];function addCart(v){cart.push(v);}
+function toast(html){const t=$('#toast');t.innerHTML='<span class="d"></span>'+html;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),5500);}
+let ME=null;
+// Parceiro de autenticação/graduação no Brasil. Trocar 'url' pelo deep-link de submissão quando lançarem.
+const PARTNER={name:'TAG Grading', url:'https://www.taggrading.com.br/'};
+async function loadMe(){const r=await J('/me');ME=r?r.user:null;renderAuthbtns();}
+function renderAuthbtns(){
+ const a=$('#authbtns'),nav=$('#navEspaco');
+ if(ME){ if(nav)nav.style.display='';
+  a.innerHTML='<a class="lnk" href="#/adicionar">+ Adicionar</a><div class="userchip" id="uchip"><div class="uav">'+ME.handle[0].toUpperCase()+'</div><span>@'+ME.handle+'</span></div>';
+  $('#uchip').onclick=()=>location.hash='#/espaco';
+ }else{ if(nav)nav.style.display='none';
+  a.innerHTML='<span class="lnk" onclick="location.hash=\u0027#/login\u0027">Entrar</span><button class="cta" onclick="location.hash=\u0027#/cadastro\u0027">Criar conta</button>';
+ }
+ renderMobileMenu();
+}
+function renderMobileMenu(){
+ const m=$('#mobilemenu');if(!m)return;
+ const links=[['#/','Início'],['#/mercado','Mercado'],['#/catalogo','Catálogo'],['#/verificar','Verificar'],['#/adicionar','Adicionar carta']];
+ if(ME)links.push(['#/espaco','Minha biblioteca']);
+ let html=links.map(l=>'<a href="'+l[0]+'">'+l[1]+'</a>').join('')+'<div class="mm-sep"></div>';
+ if(ME)html+='<div class="mm-muted">@'+ME.handle+'</div><a href="#/logout">Sair</a>';
+ else html+='<a href="#/login">Entrar</a><a class="mm-act mm-cta" onclick="location.hash=\u0027#/cadastro\u0027">Criar conta</a>';
+ m.innerHTML=html;
+ m.querySelectorAll('a').forEach(el=>el.addEventListener('click',()=>m.classList.remove('open')));
+}
+async function route(){
+ const h=(location.hash.slice(1)||'/').split('/').filter(Boolean);
+ const v=h[0]||'';
+ document.querySelectorAll('nav.menu a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+ const mm=$('#mobilemenu');if(mm)mm.classList.remove('open');
+ if(v==='logout'){await POST('/logout',{});ME=null;renderAuthbtns();location.hash='#/';return;}
+ if((v==='espaco'||v==='adicionar'||v==='graduacao')&&!ME){location.hash='#/login';return;}
+ $('#app').innerHTML='<p class="muted" style="padding:24px 0">carregando…</p>';
+ try{ await ({'':renderLanding,mercado:renderMercado,catalogo:renderCatalogo,carta:()=>renderCarta(h[1]),verificar:()=>renderVerificar(h[1]),colecionador:()=>renderColecionador(h[1]),adicionar:renderAddCard,graduacao:()=>renderGradingRequest(h[1]),login:renderLogin,cadastro:renderCadastro,espaco:renderEspaco}[v]||renderLanding)(); }
+ catch(e){ $('#app').innerHTML='<div class="status bad"><span class="dot"></span>ERRO AO CARREGAR</div><p class="muted">A API está rodando? Rode <b class="mono">python3 api.py</b> e abra <b>http://localhost:5000</b>.</p>'; }
+ window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',route);
+
+async function renderLanding(){
+ const s=await J('/stats')||{}; const mk=await J('/market?limit=8')||[];
+ $('#app').innerHTML=`
+ <section class="hero">
+  <div>
+   <div class="eyebrow">◆ Figurinhas e cards · graduados e verificáveis</div>
+   <h1>Sua figurinha vale mais <em>certificada</em>.</h1>
+   <p class="sub">Monte sua biblioteca, organize sua coleção e mostre sua vitrine. Cartas certificadas têm um certificado público — fim do "confia em mim".</p>
+   <div class="heroctas">
+    <button class="cta big" onclick="location.hash='#/cadastro'">Começar agora</button>
+    <a class="cta ghost big" href="#/mercado">Ver o mercado</a>
+   </div>
+   <div class="trustline">
+    <div><b>${(s.catalog_total||0).toLocaleString('pt-BR')}</b> cartas no catálogo</div>
+    <div><b>${s.graded||0}</b> certificadas</div>
+    <div><b>100%</b> verificação grátis</div>
+   </div>
+  </div>
+  <div class="stage"><div class="fslab rest" id="fslab">
+    <div class="lab"><span class="br">SLABR</span><span class="gr">10<small>GEM MT</small></span></div>
+    <div class="fart"><div class="base"></div><div class="num">10</div><div class="holo"></div><div class="glare"></div>
+     <div class="nm">Camisa 10<small>Craques BR '70 · nº 10</small></div></div>
+    <div class="cert">CERT 0041-A77B · scan próprio</div>
+  </div></div>
+ </section>
+ <section class="sec"><div class="feats">
+   <div class="feat"><div class="ic">🛡️</div><h3>Autenticidade real</h3><p>Slab inviolável + verificação pública por número de certificado.</p></div>
+   <div class="feat"><div class="ic">⭐</div><h3>Nota que valoriza</h3><p>Centralização, cantos, bordas e superfície numa escala de 1 a 10.</p></div>
+   <div class="feat"><div class="ic">🤝</div><h3>Venda sem disputa</h3><p>A condição é certificada — o comprador não precisa "confiar".</p></div>
+   <div class="feat"><div class="ic">🏆</div><h3>Vitrine e ranking</h3><p>Seu espaço público com suas figurinhas e ranking nacional.</p></div>
+ </div></section>
+ <section class="sec"><div class="ad banner"><span class="tag">Espaço publicitário</span><span class="txt">Banner do parceiro — lojas, eventos e lançamentos aparecem aqui.</span></div></section>
+ <section class="sec">
+  <div class="sec-h"><div><h2>Compra e venda de figurinhas</h2><p>Itens certificados à venda — dados reais do banco.</p></div><a onclick="location.hash='#/mercado'">Ver tudo →</a></div>
+  <div class="grid">${mk.map(o=>`<div class="item" onclick="location.hash='#/carta/${o.card.id}'">${thumb(o.card,o.scan,'<div class="pop"><span class="popbadge">'+tag(o)+'</span></div>')}<div class="figmeta"><span class="pr">${brl(o.value)}</span><span class="se">@${o.owner}</span></div></div>`).join('')||'<p class="muted">Sem itens ainda.</p>'}</div>
+ </section>
+ <section class="sec"><div style="display:grid;grid-template-columns:1fr 300px;gap:20px">
+   <div style="background:linear-gradient(150deg,var(--vault-2),var(--vault-3));border:1px solid var(--line-strong);border-radius:16px;padding:30px;display:flex;flex-direction:column;justify-content:center">
+    <h2 style="font-family:Bricolage Grotesque;font-weight:800;font-size:24px;letter-spacing:-.02em">Tem figurinhas paradas na gaveta?</h2>
+    <p style="color:var(--mist);margin:10px 0 18px;max-width:420px">Crie sua conta, gradue e decida o que fica público na sua vitrine e o que fica só seu.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="cta" onclick="location.hash='#/cadastro'">Criar minha conta</button><a class="cta ghost" href="#/adicionar">Adicionar uma carta</a></div>
+   </div>
+   <div class="ad"><div><span class="tag">Espaço publicitário</span><div class="txt" style="margin-top:10px">Anúncio lateral</div></div></div>
+ </div></section>
+ <footer><div class="wrap foot" style="padding:0">
+   <div><div class="brand" style="font-family:Bricolage Grotesque;font-weight:800">SLABR.br</div><div style="margin-top:8px">A autoridade de figurinhas e cards do Brasil.</div></div>
+   <div style="display:flex;gap:40px"><div><b style="color:var(--ice)">Produto</b><br><a onclick="location.hash='#/mercado'">Mercado</a><br><a onclick="location.hash='#/catalogo'">Catálogo</a><br><a onclick="location.hash='#/verificar'">Verificar</a></div>
+    <div><b style="color:var(--ice)">Conta</b><br><a onclick="location.hash='#/login'">Entrar</a><br><a onclick="location.hash='#/cadastro'">Criar conta</a></div></div>
+ </div></footer>`;
+ initTilt();
+}
+function initTilt(){
+ const card=$('#fslab');if(!card)return;const stage=card.closest('.stage');
+ function mv(e){const r=card.getBoundingClientRect();const x=((e.touches?e.touches[0].clientX:e.clientX)-r.left)/r.width;const y=((e.touches?e.touches[0].clientY:e.clientY)-r.top)/r.height;
+  card.classList.remove('rest');card.style.setProperty('--ry',((x-.5)*22).toFixed(1)+'deg');card.style.setProperty('--rx',(-(y-.5)*22).toFixed(1)+'deg');
+  card.style.setProperty('--pos',(x*100).toFixed(0)+'% '+(y*100).toFixed(0)+'%');card.style.setProperty('--mx',(x*100).toFixed(0)+'%');card.style.setProperty('--my',(y*100).toFixed(0)+'%');}
+ function rs(){card.classList.add('rest');['--ry','--rx'].forEach(p=>card.style.setProperty(p,'0deg'));card.style.setProperty('--pos','50% 50%');card.style.setProperty('--mx','50%');card.style.setProperty('--my','50%');}
+ stage.addEventListener('mousemove',mv);stage.addEventListener('mouseleave',rs);
+ stage.addEventListener('touchmove',e=>{e.preventDefault();mv(e);},{passive:false});stage.addEventListener('touchend',rs);
+}
+async function renderMercado(){
+ const mk=await J('/market?limit=40')||[];
+ $('#app').innerHTML=`
+  <div style="padding:32px 0 6px"><div class="eyebrow">◆ Mercado</div>
+   <h1 style="font-family:Bricolage Grotesque;font-weight:800;font-size:30px;letter-spacing:-.02em">Compra e venda de figurinhas</h1>
+   <p class="muted" style="margin-top:6px">Itens certificados, do mais valioso ao mais acessível. A condição é a nota.</p></div>
+  <section class="sec" style="padding-top:18px"><div class="grid">
+   ${mk.map(o=>`<div class="item" onclick="location.hash='#/carta/${o.card.id}'">${thumb(o.card,o.scan,'<div class="pop"><span class="popbadge">'+tag(o)+'</span></div>')}<div class="figmeta"><span class="pr">${brl(o.value)}</span><span class="se">@${o.owner}</span></div></div>`).join('')||'<p class="muted">Nada no mercado ainda.</p>'}
+  </div></section>
+  <section class="sec"><div class="ad banner"><span class="tag">Espaço publicitário</span><span class="txt">Banner do parceiro.</span></div></section>`;
+}
+async function renderCatalogo(){
+ $('#app').innerHTML=`
+  <div style="padding:32px 0 6px"><div class="eyebrow">◆ Catálogo</div>
+   <h1 style="font-family:Bricolage Grotesque;font-weight:800;font-size:30px;letter-spacing:-.02em">Buscar carta</h1>
+   <p class="muted" style="margin:6px 0 18px">Clique pra ver as cópias certificadas e ofertas.</p></div>
+  <div class="searchbox"><input id="cq" placeholder="ex.: Charizard, Pikachu, Blastoise" autocomplete="off"><button id="cgo">Buscar</button></div>
+  <div class="chips">${['Charizard','Pikachu','Blastoise','Mewtwo','Snorlax'].map(n=>`<span class="chip" data-q="${n}">${n}</span>`).join('')}</div>
+  <div class="grid" id="cgrid" style="margin-top:26px"></div>`;
+ $('#cgo').onclick=()=>doCat();
+ $('#cq').addEventListener('keydown',e=>{if(e.key==='Enter')doCat();});
+ document.querySelectorAll('#app .chip[data-q]').forEach(ch=>ch.onclick=()=>{$('#cq').value=ch.dataset.q;doCat();});
+ doCat('charizard');
+}
+async function doCat(seed){
+ const q=(seed||($('#cq')?$('#cq').value:'')||'').trim();
+ if(seed&&$('#cq'))$('#cq').value=seed;
+ const res=await J('/cards?q='+encodeURIComponent(q)+'&limit=30')||[];
+ $('#cgrid').innerHTML=res.map(c=>`<div class="item" onclick="location.hash='#/carta/${c.id}'">${illus(c,c.graded?'<div class="pop"><span class="popbadge">'+c.graded+' no acrílico</span></div>':'')}<div class="cap"><div class="cn">${c.name}</div><div class="cm">${c.set} · #${c.num}</div></div></div>`).join('')||'<p class="muted">Nada encontrado.</p>';
+}
+window.doCat=doCat;
+function priceChartSVG(points){
+ if(!points||!points.length) return '';
+ const W=640,H=240,pl=56,pr=16,pt=14,pb=34,N=points.length;
+ const vals=points.map(p=>p.v); const top=(Math.max(...vals)*1.12)||1;
+ const X=i=>pl+(N<2?0:(i/(N-1))*(W-pl-pr));
+ const Y=v=>pt+(1-(v/top))*(H-pt-pb);
+ let grid='',ylab='';const steps=4;
+ for(let s=0;s<=steps;s++){const gv=top*s/steps,gy=Y(gv);
+  grid+=`<line x1="${pl}" y1="${gy.toFixed(1)}" x2="${W-pr}" y2="${gy.toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`;
+  ylab+=`<text x="${pl-9}" y="${(gy+3).toFixed(1)}" text-anchor="end" font-size="10" fill="var(--mist-dim)" font-family="Space Mono">R$${Math.round(gv)}</text>`;}
+ let xlab='';[0,Math.floor(N/4),Math.floor(N/2),Math.floor(3*N/4),N-1].forEach(i=>{
+  const d=points[i].d.slice(5).split('-').reverse().join('/');
+  xlab+=`<text x="${X(i).toFixed(1)}" y="${H-12}" text-anchor="middle" font-size="9" fill="var(--mist-dim)" font-family="Space Mono">${d}</text>`;});
+ const line=points.map((p,i)=>`${i?'L':'M'}${X(i).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ');
+ const area=`M${X(0).toFixed(1)},${Y(0).toFixed(1)} `+points.map((p,i)=>`L${X(i).toFixed(1)},${Y(p.v).toFixed(1)}`).join(' ')+` L${X(N-1).toFixed(1)},${Y(0).toFixed(1)} Z`;
+ const dots=points.map((p,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="1.8" fill="var(--champagne)"/>`).join('');
+ return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block">${grid}<path d="${area}" fill="rgba(231,196,122,.08)"/><path d="${line}" fill="none" stroke="var(--champagne)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${dots}${ylab}${xlab}</svg>`;
+}
+async function renderCarta(id){
+ const c=await J('/cards/'+id); if(!c||c.error){$('#app').innerHTML='<p class="muted">Carta não encontrada.</p>';return;}
+ const offers=await J('/all-copies/'+id)||[]; const pop=await J('/pop/'+id)||{}; const hist=await J('/price-history/'+id);
+ const bynx_price=await J('/api/prices/bynx/'+id)||null;
+ const order=[["10","Nota 10"],["9","Nota 9"],["8","Nota 8"],["<=7","Nota ≤7"]];
+ const mx=Math.max(1,...order.map(o=>pop[o[0]]||0));
+ const bars=order.map(([k,lab])=>`<div class="pb"><span class="lab">${lab}</span><div class="track"><div class="fill" style="width:${Math.max(4,(pop[k]||0)/mx*100)}%"></div></div><span style="text-align:right;color:var(--mist)">${pop[k]||0}</span></div>`).join('');
+ const bynx_panel=bynx_price&&bynx_price.found?`
+  <section class="sec">
+   <div class="sectit">Preço em Bynx.gg</div>
+   <div style="background:var(--vault-2);border:1px solid var(--line);border-radius:11px;padding:16px;margin-bottom:20px">
+    <div style="font-size:20px;font-family:'Bricolage Grotesque';font-weight:800;color:var(--champagne);margin-bottom:8px">R$ ${bynx_price.price_brl.toLocaleString('pt-BR')}</div>
+    <div style="font-size:12px;color:var(--mist);margin-bottom:12px">Melhor preço em Bynx.gg</div>
+    <a href="https://bynx.gg/search?q=${c.name}" target="_blank" style="display:inline-block;padding:8px 14px;background:var(--champagne);color:#10141a;border-radius:8px;font-weight:600;font-size:12px;text-decoration:none">Ver em Bynx.gg →</a>
+   </div>
+  </section>`:'';
+ const panel=(hist&&hist.found)?`
+  <section class="sec">
+   <div class="sectit">Mercado de preços</div>
+   <div class="price-panel">
+    <div class="pp-stats">
+     <div class="pp-row"><span>Raridade</span><b>${c.rar}</b></div>
+     <div class="pp-row"><span>Número</span><b>#${c.num}</b></div>
+     <div class="pp-row"><span>Coleção</span><b>${c.set}</b></div>
+     <div class="pp-row"><span>À venda na SLABR</span><b>${hist.offers_count}${hist.offers_from?' · de '+brl(hist.offers_from):''}</b></div>
+     <div class="pp-row gold"><span>Tendência (ref.)</span><b>${brl(hist.trend)}</b></div>
+     <div class="pp-row"><span>Média 30 dias</span><b>${hist.avg30!=null?brl(hist.avg30):'—'}</b></div>
+     <div class="pp-row"><span>Média 7 dias</span><b>${hist.avg7!=null?brl(hist.avg7):'—'}</b></div>
+     <div class="pp-row"><span>Média 1 dia</span><b>${hist.avg1!=null?brl(hist.avg1):'—'}</b></div>
+    </div>
+    <div class="pp-chart">
+     ${priceChartSVG(hist.points)}
+     <div class="pp-legend"><span class="dotc"></span>Preço médio (referência)</div>
+     <div class="pp-cap">Referência internacional (${hist.currency==='EUR'?'Cardmarket €':'TCGplayer US$'}, câmbio âncora ${hist.rate}) — não é preço de venda no Brasil.</div>
+    </div>
+   </div>
+  </section>`:'';
+ $('#app').innerHTML=`
+  <span class="back" onclick="history.back()">← voltar</span>
+  <div class="two">
+   <div>
+    <div class="det"><h2>${c.name}</h2><div class="sub">${c.set} · nº ${c.num} · ${c.y} · ${c.rar}</div><span class="vbadge">TCG · catálogo</span></div>
+    <div class="section-h"><h2>À venda</h2><span>${offers.length} · menor preço</span></div>
+    <div class="status ok"><span class="dot"></span>ESTADO INFORMADO · CARTAS GRADUADAS SÃO VERIFICÁVEIS</div>
+    <div class="offers">${offers.length?offers.map(o=>`
+      <div class="offer">
+        <div class="oslab"><div style="position:absolute;inset:0;background:${bg(c.type)}"></div><div class="g ${o.gem?'gem':''}">${o.graded===false?'•':fmt(o.grade)}</div></div>
+        <div class="oinfo"><div class="gr">${o.graded===false?(o.condition||'Carta crua'):('SLABR '+fmt(o.grade)+(o.gem?'<span class="gt">GEM</span>':''))}</div>
+          <div class="se"><a href="#/colecionador/${o.owner}">@${o.owner}</a>${o.qty>1?' · '+o.qty+' un.':''}</div>
+          ${o.graded===false?'<div class="ce">carta crua (não graduada)</div>':`<div class="ce">cert ${o.cert} · <a href="#/verificar/${o.cert}" style="color:var(--mist-dim)">verificar</a></div>`}</div>
+        <div class="op"><div class="p">${o.value?brl(o.value):'—'}</div><div class="s">${o.value?'+ frete':'sem preço'}</div></div>
+        <button class="add" onclick="this.classList.add('added');this.textContent='✓';addCart(${o.value||0})">+ Carrinho</button>
+      </div>`).join(''):'<p class="muted">Ninguém colocou esta carta à venda ainda. <a href="#/adicionar" style="color:var(--champagne)">Adicione a sua →</a></p>'}</div>
+   </div>
+   <div>
+    <div style="max-width:230px;margin:0 auto">${offers.length?thumb(c,offers[0].scan):illus(c)}</div>
+    <div class="sectit" style="margin-top:20px">Pop Report</div>
+    <div class="popbars">${bars}</div>
+   </div>
+  </div>
+  ${bynx_panel}${panel}`;
+}
+async function renderVerificar(pre){
+ $('#app').innerHTML=`
+  <div style="padding:32px 0 6px"><div class="eyebrow">◆ Verificação pública</div>
+   <h1 style="font-family:Bricolage Grotesque;font-weight:800;font-size:30px;letter-spacing:-.02em">Confira um slab</h1>
+   <p class="muted" style="margin:6px 0 18px">Digite o número do certificado. Grátis, sem cadastro.</p></div>
+  <div class="searchbox"><input id="vq" class="mono" placeholder="ex.: cert do slab" autocomplete="off"><button id="vgo">Verificar</button></div>
+  <div class="chips" id="vchips"><span class="muted" style="font-size:12px">carregando exemplos…</span></div>
+  <div id="vres" style="margin-top:26px"></div>`;
+ $('#vgo').onclick=()=>doVer();
+ $('#vq').addEventListener('keydown',e=>{if(e.key==='Enter')doVer();});
+ const offs=await J('/offers/base1-4')||[];
+ $('#vchips').innerHTML=offs.slice(0,3).map(o=>`<span class="chip" data-c="${o.cert}">${o.cert}</span>`).join('')+`<span class="chip" data-c="9999-XXXX">9999-XXXX · inválido</span>`;
+ document.querySelectorAll('#vchips .chip[data-c]').forEach(ch=>ch.onclick=()=>{$('#vq').value=ch.dataset.c;doVer();});
+ if(pre){$('#vq').value=pre;doVer();}
+}
+async function doVer(){
+ const id=$('#vq').value.trim();const out=$('#vres');if(!id){out.innerHTML='';return;}
+ const g=await J('/verify/'+encodeURIComponent(id));
+ if(!g||!g.found){out.innerHTML='<div class="status bad"><span class="dot"></span>CERTIFICADO NÃO ENCONTRADO</div><p class="muted">Desconfie de slabs cujo certificado não aparece aqui.</p>';return;}
+ const c=g.card;const sg=[["Centralização",g.subs.cen],["Cantos",g.subs.cor],["Bordas",g.subs.edg],["Superfície",g.subs.sur]];
+ out.innerHTML=`<div class="status ok"><span class="dot"></span>CERTIFICADO AUTÊNTICO · VERIFICADO POR SLABR.BR</div>
+  <div class="cert-layout">
+   <div class="slab"><div class="slab-top"><span class="slab-brand">SLABR</span><span class="grade ${g.gem?'gem':''}">${fmt(g.grade)}<span class="lb">${g.gem?'GEM MT':(g.grade>=9?'MINT':'EX-MT')}</span></span></div>
+    <div class="window">${g.scan?('<img src="'+g.scan+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">'):('<div style="position:absolute;inset:0;background:'+bg(c.type)+'"></div><div class="em">'+c.name[0]+'</div>')}<div class="nm">${c.name}<small>${c.set} · #${c.num}</small></div></div>
+    <div class="scan-note">SCAN HD PRÓPRIO · CERT ${g.cert}</div></div>
+   <div class="det"><h2>${c.name}</h2><div class="sub">${c.set} · nº ${c.num} · ${c.y} · ${c.rar}</div><span class="vbadge">TCG · do catálogo</span>
+    <div class="subgrades">${sg.map(s=>'<div class="sg"><div class="k">'+s[0]+'</div><div class="v">'+fmt(s[1])+'</div></div>').join('')}</div>
+    <div class="meta-grid">
+     <div class="mc"><div class="k">Nota final</div><div class="v gold">${fmt(g.grade)}${g.gem?' · GEM MINT':''}</div></div>
+     <div class="mc"><div class="k">Valor declarado</div><div class="v gold">${brl(g.value)}</div></div>
+     <div class="mc"><div class="k">Colecionador</div><div class="v"><a href="#/colecionador/${g.owner}">@${g.owner} ↗</a></div></div>
+     <div class="mc"><div class="k">Ver ofertas</div><div class="v"><a href="#/carta/${c.id}">página da carta ↗</a></div></div>
+    </div></div></div>`;
+}
+window.doVer=doVer;
+async function renderColecionador(handle){
+ handle=handle||(ME?ME.handle:'raf10');
+ const d=await J('/collector/'+handle); if(!d){$('#app').innerHTML='<p class="muted">Colecionador não encontrado.</p>';return;}
+ $('#app').innerHTML=`
+  <span class="back" onclick="location.hash='#/mercado'">← mercado</span>
+  <div class="hero-c">
+   <div class="avatar">${handle[0].toUpperCase()}</div>
+   <div><div class="eyebrow">Vitrine pública</div><h2 style="font-size:30px">@${handle}</h2>
+    <div class="muted" style="margin:4px 0 14px">${d.city} · ${d.n} cartas certificadas públicas</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+     <span class="badge rank">★ Rank #${d.rank||'—'}</span>
+     <span class="badge">Valor: ${brl(d.val)}</span>
+     <span class="badge">Gem 10: ${d.n?Math.round(d.gems/d.n*100):0}%</span>
+    </div></div>
+  </div>
+  <div class="section-h"><h2>Vitrine</h2><span>${d.n} no acrílico</span></div>
+  <div class="grid">${d.items.length?d.items.map(it=>`<div class="item" onclick="location.hash='#/carta/${it.card.id}'">${thumb(it.card,it.scan,'<div class="pop"><span class="popbadge">'+tag(it)+'</span></div>')}<div class="cap"><div class="cn">${it.card.name}</div><div class="cm">${brl(it.value)}</div></div></div>`).join(''):'<p class="muted">Nenhuma carta pública.</p>'}</div>`;
+}
+async function renderAddCard(){
+ let sel=null, graded=false, pub=true, sale=false, scan=null;
+ $('#app').innerHTML=`
+  <div style="padding:30px 0 6px"><div class="eyebrow">◆ Minha biblioteca</div>
+   <h1 style="font-family:Bricolage Grotesque;font-weight:800;font-size:28px;letter-spacing:-.02em">Adicionar carta à biblioteca</h1>
+   <p class="muted" style="margin-top:6px">Busque a carta no catálogo e salve com as opções abaixo — entra direto na sua coleção.</p></div>
+  <div class="two" style="padding-top:18px"><div>
+    <div class="sec-form"><div class="sectit">1 · Qual carta?</div>
+      <div style="position:relative"><input id="as" placeholder="Buscar no catálogo (ex.: Charizard)" autocomplete="off"><div class="results" id="ares"></div></div>
+      <div class="selbox" id="asel"><div><b id="asn" style="font-family:Bricolage Grotesque"></b><div id="asm" style="font-family:Space Mono;font-size:11px;color:var(--mist)"></div></div><button class="chip" id="aclr">trocar</button></div>
+      <div class="drop" id="aDrop" style="margin-top:10px"><b>📷 Anexar foto da carta</b> (opcional) — arraste ou clique<input type="file" id="aFile" accept="image/*" style="display:none"></div></div>
+    <div class="sec-form"><div class="sectit">2 · Estado e quantidade</div>
+      <div class="row2"><div><label>Estado</label><select id="aCond"><option>Lacrada</option><option>Mint (M)</option><option selected>Quase nova (NM)</option><option>Excelente (EX)</option><option>Boa (GD)</option><option>Jogada (PL)</option></select></div>
+      <div><label>Quantidade</label><input type="number" id="aQty" min="1" value="1"></div></div></div>
+    <div class="sec-form"><div class="sectit">3 · É graduada?</div>
+      <div class="toggle"><span class="tlbl prv" id="agLbl"><span class="d"></span>Carta crua (não graduada)</span><div class="sw" id="agSw"></div></div>
+      <div id="agBox" style="display:none;margin-top:10px"><div class="row2"><div><label>Nota SLABR</label><input type="number" id="aGrade" min="1" max="10" step="0.5" value="10"></div><div><label>Nº do certificado (opcional)</label><input id="aCert" placeholder="gerado se vazio"></div></div></div></div>
+    <div class="sec-form"><div class="sectit">4 · Valor e visibilidade</div>
+      <div><label>Valor estimado (R$, opcional)</label><input type="number" id="aVal" min="0" step="10" placeholder="0"></div>
+      <div class="toggle" style="margin-top:10px"><span class="tlbl pub" id="apLbl"><span class="d"></span>Pública (aparece na vitrine)</span><div class="sw on" id="apSw"></div></div>
+      <div class="toggle" style="margin-top:8px"><span class="tlbl prv" id="asaleLbl"><span class="d"></span>Não está à venda</span><div class="sw" id="asaleSw"></div></div></div>
+    <button class="btn" id="aSubmit" style="width:100%;opacity:.4;pointer-events:none">Salvar na biblioteca</button>
+   </div>
+   <div><div class="sectit" style="text-align:center">Pré-visualização</div>
+     <div id="aPrev" style="max-width:220px;margin:0 auto">${illus({name:'—',type:'Colorless',rar:'Common'})}</div>
+     <div class="muted mono" id="aPrevCap" style="text-align:center;font-size:11px;margin-top:8px">escolha uma carta</div>
+     <div id="aAttrs" style="display:none;margin-top:10px"></div>
+   </div>
+  </div>`;
+ const as=$('#as'),ares=$('#ares');let t=null;
+ as.oninput=()=>{clearTimeout(t);const q=as.value.trim();if(q.length<2){ares.classList.remove('on');return;}
+   t=setTimeout(async()=>{const r=await J('/cards?q='+encodeURIComponent(q)+'&limit=8')||[];
+     ares.innerHTML=r.map(c=>`<div class="res" data-id="${c.id}"><b>${c.name}</b> <span class="rm">${c.set} #${c.num}</span></div>`).join('')||'<div class="res">nada encontrado</div>';
+     ares.classList.add('on');ares.querySelectorAll('.res[data-id]').forEach(el=>el.onclick=()=>pick(el.dataset.id));},180);};
+ async function pick(id){sel=await J('/cards/'+id);ares.classList.remove('on');as.value='';as.style.display='none';
+   $('#asn').textContent=sel.name;$('#asm').textContent=sel.set+' #'+sel.num+' · '+sel.rar;$('#asel').classList.add('on');
+   $('#aPrevCap').textContent=sel.set+' · #'+sel.num;updatePreview();
+   $('#aAttrs').style.display='block';
+   $('#aAttrs').innerHTML='<div class="sectit" style="margin-top:6px">Dados da carta</div>'+
+     [['Nome',sel.name],['Coleção',sel.set],['Número','#'+sel.num],['Raridade',sel.rar||'Common'],['Tipo',sel.type],['Ano',sel.y||'—']]
+     .map(a=>'<div class="attr"><span>'+a[0]+'</span><b>'+a[1]+'</b></div>').join('');
+   chk();}
+ function updatePreview(){const card=sel||{name:'—',type:'Colorless',rar:'Common'};$('#aPrev').innerHTML=thumb(card,scan);}
+ const aDrop=$('#aDrop'),aFile=$('#aFile');
+ aDrop.onclick=()=>aFile.click();
+ aFile.onchange=e=>{const f=e.target.files[0];if(f){const rd=new FileReader();rd.onload=ev=>{scan=ev.target.result;aDrop.classList.add('has');aDrop.innerHTML='<b>✓ Foto anexada</b> — clique para trocar';updatePreview();};rd.readAsDataURL(f);}};
+ $('#aclr').onclick=()=>{sel=null;scan=null;$('#asel').classList.remove('on');as.style.display='';aDrop.classList.remove('has');aDrop.innerHTML='<b>📷 Anexar foto da carta</b> (opcional) — arraste ou clique';$('#aPrevCap').textContent='escolha uma carta';$('#aAttrs').style.display='none';updatePreview();chk();};
+ $('#agSw').onclick=()=>{graded=!graded;$('#agSw').classList.toggle('on',graded);
+   const l=$('#agLbl');l.className='tlbl '+(graded?'pub':'prv');l.innerHTML='<span class="d"></span>'+(graded?'Graduada (slab SLABR)':'Carta crua (não graduada)');
+   $('#agBox').style.display=graded?'block':'none';};
+ $('#apSw').onclick=()=>{pub=!pub;$('#apSw').classList.toggle('on',pub);
+   const l=$('#apLbl');l.className='tlbl '+(pub?'pub':'prv');l.innerHTML='<span class="d"></span>'+(pub?'Pública (aparece na vitrine)':'Privada (só você vê)');};
+ $('#asaleSw').onclick=()=>{sale=!sale;$('#asaleSw').classList.toggle('on',sale);
+   const l=$('#asaleLbl');l.className='tlbl '+(sale?'pub':'prv');l.innerHTML='<span class="d"></span>'+(sale?'À venda (aparece no mercado)':'Não está à venda');};
+ function chk(){const b=$('#aSubmit');const ok=!!sel;b.style.opacity=ok?1:.4;b.style.pointerEvents=ok?'auto':'none';}
+ $('#aSubmit').onclick=async()=>{
+   const body={cardId:sel.id,condition:$('#aCond').value,qty:+$('#aQty').value||1,graded:graded,
+     grade:graded?+$('#aGrade').value:null,cert:graded?$('#aCert').value.trim():'',
+     value:+$('#aVal').value||0,public:pub,forSale:sale,scan:scan};
+   const r=await POST('/library',body);
+   if(r&&r.ok){toast('<span><b>'+sel.name+'</b> salva na sua biblioteca'+(r.graded?' (cert '+r.cert+')':'')+'. <a href="#/espaco">ver biblioteca →</a></span>');$('#aclr').click();}
+   else{toast('<span style="color:var(--bad)">'+((r&&r.error)||'falha ao salvar — faça login?')+'</span>');}
+ };
+}
+
+async function renderLogin(){
+ $('#app').innerHTML=`<div class="authpage"><div class="card-box">
+   <h1>Entrar</h1><div class="s">Acesse seu espaço de colecionador.</div>
+   <label>E-mail ou @usuário</label><input id="li" placeholder="raf10" autocomplete="off">
+   <label>Senha</label><input id="lp" type="password" placeholder="••••••••">
+   <div class="formerr" id="lerr"></div>
+   <button class="btn-full" id="lbtn">Entrar</button>
+   <div class="hint">Conta demo: <b>raf10</b> · senha <b>demo123</b></div>
+   <div class="swap">Não tem conta? <a onclick="location.hash='#/cadastro'">Criar agora</a></div>
+ </div></div>`;
+ $('#lbtn').onclick=doLogin;$('#lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+}
+async function doLogin(){
+ const r=await POST('/login',{id:$('#li').value,password:$('#lp').value});
+ if(r&&r.ok){ME=r.user;renderAuthbtns();toast('Bem-vindo, @'+ME.handle+'!');location.hash='#/espaco';}
+ else{$('#lerr').textContent=(r&&r.error)||'usuário ou senha incorretos';}
+}
+async function renderCadastro(){
+ $('#app').innerHTML=`<div class="authpage"><div class="card-box">
+   <h1>Criar conta de colecionador</h1><div class="s">Seus dados principais. Leva 1 minuto.</div>
+   <label>Nome completo</label><input id="cn" placeholder="Seu nome">
+   <div class="row2"><div><label>@usuário (vitrine)</label><input id="ch" placeholder="raf10"></div><div><label>Cidade / UF</label><input id="cc" placeholder="Belo Horizonte, MG"></div></div>
+   <label>E-mail</label><input id="ce" type="email" placeholder="voce@email.com">
+   <div class="row2"><div><label>Senha</label><input id="cp" type="password" placeholder="mín. 6 caracteres"></div><div><label>Coleção principal</label>
+    <select id="ccol"><option>Figurinhas de futebol</option><option>Pokémon TCG</option><option>Yu-Gi-Oh!</option><option>One Piece</option><option>Vários</option></select></div></div>
+   <div class="formerr" id="cerr"></div>
+   <button class="btn-full" id="cbtn">Criar conta</button>
+   <div class="swap">Já tem conta? <a onclick="location.hash='#/login'">Entrar</a></div>
+ </div></div>`;
+ $('#cbtn').onclick=doSignup;
+}
+async function doSignup(){
+ const r=await POST('/signup',{name:$('#cn').value,handle:$('#ch').value,email:$('#ce').value,city:$('#cc').value,password:$('#cp').value,collection:$('#ccol').value});
+ if(r&&r.ok){ME=r.user;renderAuthbtns();toast('Conta criada! Bem-vindo, @'+ME.handle+'.');location.hash='#/espaco';}
+ else{$('#cerr').textContent=(r&&r.error)||'não foi possível criar a conta';}
+}
+async function renderEspaco(){
+ const d=await J('/me/cards'); if(!d||d.error){location.hash='#/login';return;}
+ const reqs=await J('/me/grading-requests')||[];
+ const val=d.items.reduce((a,x)=>a+x.value,0);
+ const reqsHtml=reqs.length?`
+  <div class="section-h" style="margin-top:30px"><h2>Pedidos de graduação</h2><span>${reqs.length}</span></div>
+  ${reqs.map(r=>`<div class="reqrow"><div><b>${r.card.name}</b> <span class="pr">· ${r.protocol} · ${r.service} · R$ ${r.value.toLocaleString('pt-BR')}</span></div><div class="st">${r.status}</div></div>`).join('')}`:'';
+ $('#app').innerHTML=`
+  <div class="hero-c">
+   <div class="avatar">${ME.handle[0].toUpperCase()}</div>
+   <div><div class="eyebrow">Minha biblioteca</div><h2 style="font-size:30px">@${ME.handle}</h2>
+    <div class="muted" style="margin:4px 0 14px">${ME.city||'Brasil'} · ${d.n} cartas · ${d.public_n} públicas</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+     <a class="badge rank" href="#/colecionador/${ME.handle}">★ ver minha vitrine pública</a>
+     <span class="badge">${brl(val)} em coleção</span>
+     <span class="lnk" onclick="location.hash='#/logout'" style="border:1px solid var(--line);border-radius:999px">sair</span>
+    </div></div>
+  </div>
+  <div class="section-h"><h2>Minhas cartas</h2><span>visibilidade · à venda · graduação</span></div>
+  <div class="grid" id="myGrid"></div>
+  ${reqsHtml}`;
+ drawMyGrid(d.items);
+}
+function drawMyGrid(items){
+ const g=$('#myGrid'); if(!g)return;
+ g.innerHTML=items.map(it=>{const c=it.card;
+   const badge=it.graded?('SLABR '+fmt(it.grade)):(it.condition||'crua');
+   const qty=(it.qty&&it.qty>1)?(' ×'+it.qty):'';
+   return `<div>
+     <div onclick="location.hash='#/carta/${c.id}'" style="cursor:pointer">${thumb(c,it.scan,(it.public?'<div class="pop"><span class="popbadge">'+badge+'</span></div>':'<div class="figlock">🔒 privada</div>'))}</div>
+     <div class="cap"><div class="cn">${c.name}${qty}</div><div class="cm">${it.value?brl(it.value):(it.graded?'graduada':it.condition||'—')}</div></div>
+     <div class="toggle"><span class="tlbl ${it.public?'pub':'prv'}"><span class="d"></span>${it.public?'Pública':'Privada'}</span>
+       <div class="sw vis ${it.public?'on':''}" data-cert="${it.cert}" data-pub="${it.public?1:0}"></div></div>
+     <div class="toggle" style="margin-top:6px"><span class="tlbl ${it.forSale?'pub':'prv'}"><span class="d"></span>${it.forSale?'À venda':'Fora do mercado'}</span>
+       <div class="sw sale ${it.forSale?'on':''}" data-cert="${it.cert}" data-sale="${it.forSale?1:0}"></div></div>
+     ${it.graded?'<div class="grdtag">✓ graduada</div>':`<a class="grdbtn" href="#/graduacao/${it.cert}">Graduar pela TAG Grading</a>`}
+   </div>`;}).join('') + `<div class="addtile" onclick="location.hash='#/adicionar'"><div class="plus">+</div><div style="font-size:13px">Adicionar carta</div></div>`;
+ g.querySelectorAll('.sw.vis').forEach(sw=>sw.onclick=()=>toggleVis(sw));
+ g.querySelectorAll('.sw.sale').forEach(sw=>sw.onclick=()=>toggleSale(sw));
+}
+async function toggleVis(sw){
+ const cert=sw.dataset.cert,next=sw.dataset.pub==='1'?false:true;
+ const r=await POST('/graded/'+encodeURIComponent(cert)+'/visibility',{public:next});
+ if(r&&r.ok){const d=await J('/me/cards');drawMyGrid(d.items);toast(next?'Card agora é público — visível na vitrine.':'Card agora é privado — só você vê.');}
+ else{toast('<span style="color:var(--bad)">'+((r&&r.error)||'falha ao atualizar')+'</span>');}
+}
+async function toggleSale(sw){
+ const cert=sw.dataset.cert,next=sw.dataset.sale==='1'?false:true;
+ const r=await POST('/graded/'+encodeURIComponent(cert)+'/sale',{forSale:next});
+ if(r&&r.ok){const d=await J('/me/cards');drawMyGrid(d.items);toast(next?'Card agora está à venda — aparece no mercado.':'Card saiu do mercado.');}
+ else{toast('<span style="color:var(--bad)">'+((r&&r.error)||'falha ao atualizar')+'</span>');}
+}
+const CHECK=[
+ ['owner','Sou o proprietário desta carta e ela está em minha posse.'],
+ ['authentic','A carta é <b>autêntica e original</b> (não é proxy, cópia ou reimpressão não-oficial).'],
+ ['unaltered','A carta <b>não passou por restauro, recorte, colagem ou alteração</b>.'],
+ ['clean','A carta está <b>limpa e seca</b>, sem fitas, adesivos ou resíduos.'],
+ ['terms','Li e aceito os <b>prazos e a tabela de preços</b> do serviço de graduação.'],
+ ['packaging','Vou embalar conforme as instruções (sleeve + toploader) antes de enviar.']
+];
+async function renderGradingRequest(cert){
+ const d=await J('/me/cards'); if(!d||d.error){location.hash='#/login';return;}
+ const it=(d.items||[]).find(x=>x.cert===cert);
+ if(!it){$('#app').innerHTML='<span class="back" onclick="location.hash=\u0027#/espaco\u0027">← biblioteca</span><p class="muted" style="margin-top:14px">Carta não encontrada na sua biblioteca.</p>';return;}
+ if(it.graded){$('#app').innerHTML='<span class="back" onclick="location.hash=\u0027#/espaco\u0027">← biblioteca</span><p class="muted" style="margin-top:14px">Essa carta já está graduada.</p>';return;}
+ const c=it.card;
+ const state={owner:false,authentic:false,unaltered:false,clean:false,terms:false,packaging:false};
+ $('#app').innerHTML=`
+  <span class="back" onclick="location.hash='#/espaco'">← biblioteca</span>
+  <div style="padding:18px 0 6px"><div class="eyebrow">◆ Autenticação · ${PARTNER.name} (parceira)</div>
+   <h1 style="font-family:Bricolage Grotesque;font-weight:800;font-size:28px;letter-spacing:-.02em">Enviar para autenticar e graduar</h1>
+   <p class="muted" style="margin-top:6px">A autenticação e graduação são feitas pela <b>${PARTNER.name}</b>, nossa parceira no Brasil. Confira os dados, preencha o checklist e continue no site deles.</p></div>
+  <div class="two" style="padding-top:14px"><div>
+    <div class="sectit">Checklist obrigatório</div>
+    <div id="chkList">${CHECK.map(([k,t])=>`<div class="chk" data-k="${k}"><div class="box"></div><div class="tx">${t}</div></div>`).join('')}</div>
+    <div class="sec-form" style="margin-top:18px"><div class="sectit">Dados do envio</div>
+      <div class="row2"><div><label>Valor declarado (R$, p/ seguro)</label><input type="number" id="grVal" min="0" step="10" value="${it.value||''}" placeholder="ex.: 500"></div>
+      <div><label>Serviço</label><select id="grSvc"><option>Econômico</option><option selected>Padrão</option><option>Expresso</option></select></div></div>
+      <label>Observações (opcional)</label><input id="grNotes" placeholder="algo que devemos saber sobre a carta"></div>
+    <button class="btn" id="grSubmit" style="width:100%;opacity:.4;pointer-events:none">Continuar no site da ${PARTNER.name} →</button>
+    <div class="hint">Registramos o pedido na sua biblioteca e abrimos o site da ${PARTNER.name} numa nova aba para você concluir a submissão.</div>
+   </div>
+   <div>
+    <div class="sectit" style="text-align:center">Carta</div>
+    <div style="max-width:220px;margin:0 auto">${illus(c)}</div>
+    <div id="grAttrs" style="margin-top:10px"><div class="sectit">Dados da carta</div>${[['Nome',c.name],['Coleção',c.set],['Número','#'+c.num],['Estado atual',it.condition||'—']].map(a=>'<div class="attr"><span>'+a[0]+'</span><b>'+a[1]+'</b></div>').join('')}</div>
+   </div>
+  </div>`;
+ function refresh(){const ok=CHECK.every(([k])=>state[k]) && (+$('#grVal').value>0);const b=$('#grSubmit');b.style.opacity=ok?1:.4;b.style.pointerEvents=ok?'auto':'none';}
+ document.querySelectorAll('#chkList .chk').forEach(el=>el.onclick=()=>{const k=el.dataset.k;state[k]=!state[k];el.classList.toggle('on',state[k]);el.querySelector('.box').textContent=state[k]?'✓':'';refresh();});
+ $('#grVal').oninput=refresh;
+ $('#grSubmit').onclick=async()=>{
+   const r=await POST('/grading-request',{cert,checklist:state,declared_value:+$('#grVal').value||0,service:$('#grSvc').value,notes:$('#grNotes').value});
+   if(r&&r.ok){
+     window.open(PARTNER.url,'_blank','noopener');
+     $('#app').innerHTML=`<div class="confirm"><div class="eyebrow" style="justify-content:center">✓ Pedido registrado</div>
+       <div class="proto">${r.protocol}</div>
+       <p class="muted">Status: <b style="color:var(--champagne)">${r.status}</b></p>
+       <p style="margin:14px 0;line-height:1.5">Abrimos o site da <b>${PARTNER.name}</b> numa nova aba para você concluir a submissão. Se não abriu, use o botão abaixo. Guarde o protocolo <b>${r.protocol}</b> — você acompanha o status na sua biblioteca.</p>
+       <a class="btn" href="${PARTNER.url}" target="_blank" rel="noopener">Abrir o site da ${PARTNER.name} →</a>
+       <div style="margin-top:12px"><a class="lnk" href="#/espaco">voltar à biblioteca</a></div></div>`;
+     window.scrollTo(0,0);
+   } else { toast('<span style="color:var(--bad)">'+((r&&r.error)||'falha ao enviar')+'</span>'); }
+ };
+}
+$('#burger').onclick=()=>$('#mobilemenu').classList.toggle('open');
+loadMe().then(route);
+</script></body></html>
