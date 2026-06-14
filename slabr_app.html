@@ -360,26 +360,35 @@ async function renderCatalogo(){
  doCat();
 }
 async function doCat(){
- const res=await J('/api/colecionadores')||{};
- const coletores=(res.colecionadores||[]).filter(c=>c.total_cards>0);
- $('#cgrid').innerHTML=coletores.map(c=>`
-  <div class="item" onclick="location.hash='#/colecionador/${c.handle}'" style="cursor:pointer;padding:0;overflow:hidden">
-   <div style="background:linear-gradient(135deg,var(--vault) 0%,var(--vault-3) 100%);padding:24px;text-align:center;border-bottom:1px solid var(--line)">
-    <div style="font-weight:700;font-size:18px;color:var(--ice)">@${c.handle}</div>
-    <div style="font-size:12px;color:var(--mist)">📍 ${c.city||'Brasil'}</div>
-   </div>
-   <div style="padding:16px">
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-     <span style="color:var(--mist);font-size:12px">Cartas</span>
-     <span style="color:var(--champagne);font-weight:700">${c.total_cards||0}</span>
+ try {
+   const res=await J('/colecionadores')||{};
+   const coletores=(res.colecionadores||[]).filter(c=>c.total_cards>0);
+   if(!coletores||coletores.length===0){
+     $('#cgrid').innerHTML='<p class="muted">Nenhum colecionador encontrado.</p>';
+     return;
+   }
+   $('#cgrid').innerHTML=coletores.map(c=>`
+    <div class="item" onclick="location.hash='#/colecionador/${c.handle}'" style="cursor:pointer;padding:0;overflow:hidden">
+     <div style="background:linear-gradient(135deg,var(--vault) 0%,var(--vault-3) 100%);padding:24px;text-align:center;border-bottom:1px solid var(--line)">
+      <div style="font-weight:700;font-size:18px;color:var(--ice)">@${c.handle}</div>
+      <div style="font-size:12px;color:var(--mist)">📍 ${c.city||'Brasil'}</div>
+     </div>
+     <div style="padding:16px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+       <span style="color:var(--mist);font-size:12px">Cartas</span>
+       <span style="color:var(--champagne);font-weight:700">${c.total_cards||0}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+       <span style="color:var(--mist);font-size:12px">Patrimônio</span>
+       <span style="color:var(--champagne);font-weight:700">R$ ${(c.total_value||0).toLocaleString('pt-BR')}</span>
+      </div>
+     </div>
     </div>
-    <div style="display:flex;justify-content:space-between">
-     <span style="color:var(--mist);font-size:12px">Patrimônio</span>
-     <span style="color:var(--champagne);font-weight:700">R$ ${(c.total_value||0).toLocaleString('pt-BR')}</span>
-    </div>
-   </div>
-  </div>
- `).join('')||'<p class="muted">Nenhum colecionador encontrado.</p>';
+   `).join('');
+ } catch(e) {
+   console.error('Erro ao carregar catálogo:', e);
+   $('#cgrid').innerHTML='<p class="muted">Erro ao carregar colecionadores.</p>';
+ }
 }
 window.doCat=doCat;
 function priceChartSVG(points){
