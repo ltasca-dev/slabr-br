@@ -8,9 +8,14 @@ Rodar:
 
 Contas demo (senha: demo123): raf10, marina.sp, joao_v, ana.bea, lucas_rs, tcg_bsb
 """
-import sqlite3, json, os, re, datetime
+import sqlite3, json, os, re, datetime, threading
 from flask import Flask, jsonify, request, g, session, Response
 from werkzeug.security import generate_password_hash, check_password_hash
+try:
+    from apscheduler.schedulers.background import BackgroundScheduler
+    SCHEDULER_AVAILABLE = True
+except ImportError:
+    SCHEDULER_AVAILABLE = False
 
 DB   = os.environ.get("SLABR_DB", "pokemon_catalog.db")
 HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "slabr_app.html")
@@ -1475,15 +1480,18 @@ nav a:hover{{color:var(--ice);border-bottom-color:var(--champagne)}}
 .stat-box{{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;padding:20px;border-left:4px solid var(--champagne)}}
 .stat-label{{font-size:12px;color:var(--mist);text-transform:uppercase;margin-bottom:10px;letter-spacing:0.1em}}
 .stat-value{{font-size:24px;font-weight:800;color:var(--champagne)}}
-.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px;margin-top:30px}}
-.card{{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:all 0.3s;cursor:pointer}}
-.card:hover{{border-color:var(--champagne);transform:translateY(-5px);box-shadow:0 10px 30px rgba(231,196,122,0.2)}}
-.card-image{{width:100%;aspect-ratio:3/4;background:linear-gradient(135deg,var(--vault) 0%,var(--line) 100%);display:flex;align-items:center;justify-content:center;font-size:60px;position:relative}}
-.card-grade{{position:absolute;top:10px;right:10px;background:var(--champagne);color:var(--vault);padding:5px 10px;border-radius:6px;font-size:12px;font-weight:800}}
-.card-gem{{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px}}
-.card-info{{padding:15px}}
-.card-name{{font-weight:600;color:var(--ice);margin-bottom:5px;font-size:13px}}
-.card-value{{font-size:14px;font-weight:700;color:var(--champagne)}}
+.gallery{{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;margin-top:30px}}
+.gallery-card{{background:var(--vault-2);border:1px solid var(--line);border-radius:10px;overflow:hidden;transition:all 0.3s;cursor:pointer}}
+.gallery-card:hover{{border-color:var(--champagne);transform:translateY(-8px);box-shadow:0 12px 40px rgba(231,196,122,0.3)}}
+.card-image{{width:100%;aspect-ratio:2.5/3.5;background:linear-gradient(135deg,var(--vault) 0%,var(--vault-3) 100%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}}
+.card-image img{{width:100%;height:100%;object-fit:contain;padding:8px}}
+.card-image.loading{{background:linear-gradient(90deg,var(--vault-3) 25%,var(--vault) 50%,var(--vault-3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}}
+@keyframes shimmer{{0%{{background-position:200% 0}}100%{{background-position:-200% 0}}}}
+.card-grade{{position:absolute;top:8px;right:8px;background:var(--champagne);color:var(--vault);padding:4px 8px;border-radius:4px;font-size:11px;font-weight:800}}
+.card-gem{{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:32px;text-shadow:0 0 8px rgba(0,0,0,0.8)}}
+.card-info{{padding:12px}}
+.card-name{{font-weight:600;color:var(--ice);margin-bottom:4px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+.card-value{{font-size:13px;font-weight:700;color:var(--champagne)}}
 .btn{{padding:10px 20px;background:var(--champagne);color:var(--vault);border:none;border-radius:6px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block;margin-top:20px}}
 .btn:hover{{opacity:0.9}}
 footer{{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:var(--mist);font-size:12px;margin-top:60px}}
@@ -1510,9 +1518,9 @@ footer{{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:
         </div>
     </div>
 
-    <h2 style="font-size:24px;color:var(--champagne);margin:40px 0 20px">Cartas Graduadas Públicas</h2>
-    <div id="cards-grid" class="grid">
-        <div style="text-align:center;padding:40px;color:var(--mist)">Carregando cartas...</div>
+    <h2 style="font-size:24px;color:var(--champagne);margin:40px 0 20px">🖼️ Galeria de Cartas</h2>
+    <div id="cards-grid" class="gallery">
+        <div style="text-align:center;padding:40px;color:var(--mist);grid-column:1/-1">Carregando galeria...</div>
     </div>
 
     <a href="https://wa.me/?text=Oi%20{user['handle']}%20vi%20sua%20colecao%20no%20SLABR" class="btn" target="_blank">💬 Contatar no WhatsApp</a>
@@ -1521,32 +1529,43 @@ footer{{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:
 <footer><p>SLABR - Marketplace de Trading Cards | Perfis Públicos de Colecionadores</p></footer>
 
 <script>
-async function loadCards() {{
-    const res = await fetch('/api/perfil/{handle}/cartas');
-    const data = await res.json();
-    const grid = document.getElementById('cards-grid');
+async function loadGaleria() {{
+    try {{
+        const res = await fetch('/api/perfil/{handle}/galeria');
+        const data = await res.json();
+        const grid = document.getElementById('cards-grid');
 
-    if (!data.graded_public || data.graded_public.length === 0) {{
-        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--mist);grid-column:1/-1">Nenhuma carta graduada pública</div>';
-        return;
+        if (!data.cartas || data.cartas.length === 0) {{
+            grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--mist);grid-column:1/-1">Nenhuma carta graduada pública</div>';
+            return;
+        }}
+
+        grid.innerHTML = data.cartas.map((c, idx) => `
+            <div class="gallery-card" style="animation:fadeIn 0.3s ease-in {{animation-delay: ${{idx * 30}}ms}}">
+                <div class="card-image loading" id="img-${{c.cert}}">
+                    <img src="${{c.image}}" alt="${{c.cardName}}" onload="this.parentElement.classList.remove('loading')" onerror="this.parentElement.textContent='Erro'>
+                    <span class="card-grade">${{c.grade}}</span>
+                    ${{c.gem ? '<span class="card-gem">✨</span>' : ''}}
+                </div>
+                <div class="card-info">
+                    <div class="card-name">${{c.cardName}}</div>
+                    <div class="card-value">R$ ${{(c.value || 0).toLocaleString('pt-BR')}}</div>
+                </div>
+            </div>
+        `).join('');
+    }} catch (e) {{
+        console.error(e);
+        document.getElementById('cards-grid').innerHTML = '<div style="grid-column:1/-1;color:red;padding:20px">Erro ao carregar galeria</div>';
     }}
-
-    grid.innerHTML = data.graded_public.map(c => `
-        <div class="card">
-            <div class="card-image">
-                {{c.gem ? '💎' : '🎴'}}
-                <span class="card-grade">{{c.grade}}</span>
-                {{c.gem ? '<span class="card-gem">✨</span>' : ''}}
-            </div>
-            <div class="card-info">
-                <div class="card-name">{{c.card_id}}</div>
-                <div class="card-value">R$ {{(c.value || 0).toLocaleString('pt-BR')}}</div>
-            </div>
-        </div>
-    `).join('');
 }}
-loadCards();
+loadGaleria();
 </script>
+<style>
+@keyframes fadeIn {{
+    from {{ opacity: 0; transform: translateY(10px); }}
+    to {{ opacity: 1; transform: translateY(0); }}
+}}
+</style>
 </body></html>"""
     return html
 
@@ -1626,6 +1645,63 @@ def bynx_sincronizar():
         })
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
+
+# ---- Sincronização automática com Bynx (1x por dia) ----
+def sync_bynx_daily():
+    """Sincroniza preços com Bynx uma vez por dia"""
+    try:
+        con = sqlite3.connect(DB)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        # Atualizar tabela de sincronização (se não existir, criar)
+        cur.execute("""CREATE TABLE IF NOT EXISTS bynx_sync_log (
+            id INTEGER PRIMARY KEY,
+            card_id TEXT,
+            slabr_price REAL,
+            bynx_price REAL,
+            diff_percent REAL,
+            synced_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )""")
+
+        # Top 50 cards por valor
+        cards = cur.execute("""
+            SELECT DISTINCT c.id, c.name,
+                   AVG(g.declared_value_cents) / 100.0 as slabr_price
+            FROM cards c
+            JOIN graded_items g ON g.card_id = c.id
+            WHERE g.public = 1
+            GROUP BY c.id
+            ORDER BY AVG(g.declared_value_cents) DESC
+            LIMIT 50
+        """).fetchall()
+
+        for card in cards:
+            prices = cur.execute(
+                "SELECT market FROM card_prices WHERE card_id=? LIMIT 1",
+                (card["id"],)
+            ).fetchone()
+
+            bynx_price = float(prices["market"] or 0) * EUR_BRL if prices else 0
+            diff_percent = ((card["slabr_price"] - bynx_price) / bynx_price * 100) if bynx_price > 0 else 0
+
+            # Log da sincronização
+            cur.execute("""INSERT INTO bynx_sync_log (card_id, slabr_price, bynx_price, diff_percent)
+                          VALUES (?, ?, ?, ?)""",
+                       (card["id"], card["slabr_price"], bynx_price, diff_percent))
+
+        con.commit()
+        con.close()
+        print(f"[SYNC] Sincronização Bynx concluída: {len(cards)} cards")
+    except Exception as e:
+        print(f"[SYNC] Erro na sincronização: {e}")
+
+# Iniciar scheduler se disponível
+if SCHEDULER_AVAILABLE:
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(sync_bynx_daily, 'cron', hour=3, minute=0)  # 3 da manhã todo dia
+    scheduler.start()
+    print("[SCHEDULER] Sincronização Bynx agendada diariamente às 3:00 AM")
 
 # roda a migração no import também (deploys com gunicorn não executam o bloco __main__)
 migrate_and_seed()
