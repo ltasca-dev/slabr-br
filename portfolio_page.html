@@ -1,0 +1,353 @@
+<!-- Portfolio Manager - Página de Gerenciamento de Coleção -->
+
+<div id="portfolio-page" style="display:none; padding: 20px;">
+  <h1>Minha Coleção</h1>
+
+  <!-- Tabs: Coleção vs Estatísticas vs Alertas -->
+  <div style="border-bottom: 2px solid var(--line); margin-bottom: 20px;">
+    <button onclick="showPortfolioTab('collection')" class="tab-btn active" style="padding:15px 20px; background:none; border:none; border-bottom:3px solid var(--champagne); color:var(--champagne); cursor:pointer; font-size:14px; font-weight:bold;">
+      📋 Minha Coleção
+    </button>
+    <button onclick="showPortfolioTab('stats')" class="tab-btn" style="padding:15px 20px; background:none; border:none; border-bottom:3px solid transparent; color:var(--mist); cursor:pointer; font-size:14px;">
+      📊 Estatísticas
+    </button>
+    <button onclick="showPortfolioTab('alerts')" class="tab-btn" style="padding:15px 20px; background:none; border:none; border-bottom:3px solid transparent; color:var(--mist); cursor:pointer; font-size:14px;">
+      🔔 Alertas
+    </button>
+  </div>
+
+  <!-- TAB 1: COLEÇÃO -->
+  <div id="collection-tab" style="display:block;">
+    <div style="display:flex; gap:15px; margin-bottom:30px;">
+      <!-- Upload CSV -->
+      <div style="flex:1;">
+        <h3>Importar Coleção</h3>
+        <input type="file" id="csv-upload" accept=".csv" style="padding:10px; border:1px solid var(--line); border-radius:5px; width:100%;">
+        <button onclick="importCSV()" style="margin-top:10px; padding:10px 20px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+          📤 Importar CSV
+        </button>
+      </div>
+
+      <!-- Adicionar Manual -->
+      <div style="flex:1;">
+        <h3>Adicionar Carta</h3>
+        <input type="text" id="card-id-input" placeholder="Card ID (ex: base1-4)" style="padding:10px; border:1px solid var(--line); border-radius:5px; width:100%; margin-bottom:10px;">
+        <input type="text" id="card-name-input" placeholder="Nome da Carta" style="padding:10px; border:1px solid var(--line); border-radius:5px; width:100%; margin-bottom:10px;">
+        <input type="number" id="card-price-input" placeholder="Preço de Compra" style="padding:10px; border:1px solid var(--line); border-radius:5px; width:100%; margin-bottom:10px;">
+        <button onclick="addCardManual()" style="padding:10px 20px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+          ➕ Adicionar
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabela de Cartas -->
+    <h3>Minhas Cartas</h3>
+    <div id="collection-list" style="display:grid; gap:15px; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));">
+      <p style="color:var(--mist);">Carregando coleção...</p>
+    </div>
+  </div>
+
+  <!-- TAB 2: ESTATÍSTICAS -->
+  <div id="stats-tab" style="display:none;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px; margin-bottom:30px;">
+      <div style="background:var(--vault-2); padding:20px; border-radius:10px; border-left:4px solid var(--champagne);">
+        <div style="color:var(--mist); font-size:12px;">Total de Cartas</div>
+        <div style="font-size:32px; font-weight:bold; color:var(--champagne);" id="stat-total-cards">0</div>
+      </div>
+
+      <div style="background:var(--vault-2); padding:20px; border-radius:10px; border-left:4px solid var(--champagne);">
+        <div style="color:var(--mist); font-size:12px;">Valor de Custo</div>
+        <div style="font-size:32px; font-weight:bold; color:var(--champagne);" id="stat-total-cost">R$ 0</div>
+      </div>
+
+      <div style="background:var(--vault-2); padding:20px; border-radius:10px; border-left:4px solid var(--champagne);">
+        <div style="color:var(--mist); font-size:12px;">Valor Atual</div>
+        <div style="font-size:32px; font-weight:bold; color:var(--champagne);" id="stat-total-value">R$ 0</div>
+      </div>
+
+      <div style="background:var(--vault-2); padding:20px; border-radius:10px; border-left:4px solid var(--champagne);">
+        <div style="color:var(--mist); font-size:12px;">Ganho/Perda</div>
+        <div style="font-size:32px; font-weight:bold; color:var(--champagne);" id="stat-gain-loss">R$ 0</div>
+        <div style="color:var(--mist); font-size:12px;" id="stat-gain-loss-pct">(0%)</div>
+      </div>
+    </div>
+
+    <!-- Maiores Ganhos -->
+    <h3>🚀 Maiores Ganhos</h3>
+    <div id="biggest-gains" style="display:grid; gap:10px; margin-bottom:30px;">
+      <p style="color:var(--mist);">Carregando...</p>
+    </div>
+
+    <!-- Maiores Perdas -->
+    <h3>📉 Maiores Perdas</h3>
+    <div id="biggest-losses" style="display:grid; gap:10px;">
+      <p style="color:var(--mist);">Carregando...</p>
+    </div>
+  </div>
+
+  <!-- TAB 3: ALERTAS -->
+  <div id="alerts-tab" style="display:none;">
+    <div style="margin-bottom:30px; padding:20px; background:var(--vault-2); border-radius:10px;">
+      <h3>Criar Novo Alerta</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;">
+        <input type="text" id="alert-card-name" placeholder="Nome da Carta" style="padding:10px; border:1px solid var(--line); border-radius:5px;">
+        <input type="number" id="alert-price" placeholder="Preço Limite (R$)" style="padding:10px; border:1px solid var(--line); border-radius:5px;">
+        <select id="alert-type" style="padding:10px; border:1px solid var(--line); border-radius:5px;">
+          <option value="up">Preço subir acima de</option>
+          <option value="down">Preço cair abaixo de</option>
+        </select>
+      </div>
+      <button onclick="createAlert()" style="margin-top:15px; padding:10px 20px; background:var(--champagne); color:var(--vault); border:none; border-radius:5px; cursor:pointer; font-weight:bold;">
+        + Criar Alerta
+      </button>
+    </div>
+
+    <h3>Meus Alertas</h3>
+    <div id="alerts-list" style="display:grid; gap:10px;">
+      <p style="color:var(--mist);">Nenhum alerta criado</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// Portfolio Manager Functions
+
+const CURRENT_USER = 'leonardo'; // TODO: Pegar do login real
+
+function showPortfolioTab(tab) {
+  // Hide all tabs
+  document.querySelectorAll('[id$="-tab"]').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.style.borderBottom = '3px solid transparent';
+    btn.style.color = 'var(--mist)';
+  });
+
+  // Show selected tab
+  document.getElementById(tab + '-tab').style.display = 'block';
+  event.target.style.borderBottom = '3px solid var(--champagne)';
+  event.target.style.color = 'var(--champagne)';
+
+  // Load data
+  if (tab === 'collection') loadCollections();
+  if (tab === 'stats') loadStats();
+  if (tab === 'alerts') loadAlerts();
+}
+
+async function loadCollections() {
+  try {
+    const response = await fetch(`/api/portfolio/collections/${CURRENT_USER}`);
+    const data = await response.json();
+
+    if (data.status === 'success' && data.collections.length > 0) {
+      const html = data.collections.map(card => `
+        <div style="background:var(--vault-2); padding:15px; border-radius:10px; border-left:4px solid var(--champagne);">
+          <div style="font-weight:bold; font-size:14px; color:var(--champagne);">${card.card_name}</div>
+          <div style="font-size:12px; color:var(--mist); margin-top:5px;">ID: ${card.card_id}</div>
+          <div style="font-size:12px; color:var(--mist);">Quantidade: ${card.quantity}</div>
+          <div style="font-size:12px; color:var(--mist);">Condição: ${card.condition}</div>
+          <div style="font-size:12px; color:var(--champagne); margin-top:10px; font-weight:bold;">R$ ${parseFloat(card.purchase_price || 0).toFixed(2)}</div>
+          <button onclick="deleteCard('${card.id}')" style="margin-top:10px; padding:5px 10px; background:#ff6b6b; color:white; border:none; border-radius:5px; cursor:pointer; font-size:12px;">
+            ❌ Remover
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('collection-list').innerHTML = html;
+    } else {
+      document.getElementById('collection-list').innerHTML = '<p style="color:var(--mist);">Nenhuma carta na coleção</p>';
+    }
+  } catch (error) {
+    console.error('Erro ao carregar coleção:', error);
+  }
+}
+
+async function addCardManual() {
+  const cardId = document.getElementById('card-id-input').value;
+  const cardName = document.getElementById('card-name-input').value;
+  const price = document.getElementById('card-price-input').value;
+
+  if (!cardId || !cardName || !price) {
+    alert('Preencha todos os campos');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/portfolio/collections', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: CURRENT_USER,
+        card_id: cardId,
+        card_name: cardName,
+        purchase_price: parseFloat(price)
+      })
+    });
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      alert('Carta adicionada!');
+      document.getElementById('card-id-input').value = '';
+      document.getElementById('card-name-input').value = '';
+      document.getElementById('card-price-input').value = '';
+      loadCollections();
+    }
+  } catch (error) {
+    console.error('Erro ao adicionar carta:', error);
+  }
+}
+
+async function importCSV() {
+  const file = document.getElementById('csv-upload').files[0];
+  if (!file) {
+    alert('Selecione um arquivo CSV');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await fetch(`/api/portfolio/collections/${CURRENT_USER}/import`, {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+    alert(`${data.imported} cartas importadas com sucesso!`);
+    loadCollections();
+  } catch (error) {
+    console.error('Erro ao importar CSV:', error);
+  }
+}
+
+async function deleteCard(cardId) {
+  if (!confirm('Tem certeza que deseja remover esta carta?')) return;
+
+  try {
+    const response = await fetch(`/api/portfolio/collections/${cardId}`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      loadCollections();
+    }
+  } catch (error) {
+    console.error('Erro ao remover carta:', error);
+  }
+}
+
+async function loadStats() {
+  try {
+    const response = await fetch(`/api/portfolio/stats/${CURRENT_USER}`);
+    const data = await response.json();
+
+    if (data.status === 'success') {
+      document.getElementById('stat-total-cards').textContent = data.total_cards;
+      document.getElementById('stat-total-cost').textContent = `R$ ${data.total_cost.toFixed(2)}`;
+      document.getElementById('stat-total-value').textContent = `R$ ${data.total_value.toFixed(2)}`;
+      document.getElementById('stat-gain-loss').textContent = `R$ ${data.gain_loss.toFixed(2)}`;
+      document.getElementById('stat-gain-loss-pct').textContent = `(${data.gain_loss_pct}%)`;
+
+      const gainsHTML = data.biggest_gains.map(g => `
+        <div style="background:var(--vault-2); padding:15px; border-radius:10px; border-left:4px solid #28a745;">
+          <div style="font-weight:bold;">${g.card_name}</div>
+          <div style="font-size:12px; color:var(--mist);">Custo: R$ ${g.purchase_price.toFixed(2)} → Atual: R$ ${g.current_price.toFixed(2)}</div>
+          <div style="font-size:14px; font-weight:bold; color:#28a745;">+R$ ${g.gain.toFixed(2)}</div>
+        </div>
+      `).join('');
+      document.getElementById('biggest-gains').innerHTML = gainsHTML || '<p style="color:var(--mist);">Sem ganhos</p>';
+
+      const lossesHTML = data.biggest_losses.map(l => `
+        <div style="background:var(--vault-2); padding:15px; border-radius:10px; border-left:4px solid #ff6b6b;">
+          <div style="font-weight:bold;">${l.card_name}</div>
+          <div style="font-size:12px; color:var(--mist);">Custo: R$ ${l.purchase_price.toFixed(2)} → Atual: R$ ${l.current_price.toFixed(2)}</div>
+          <div style="font-size:14px; font-weight:bold; color:#ff6b6b;">-R$ ${Math.abs(l.loss).toFixed(2)}</div>
+        </div>
+      `).join('');
+      document.getElementById('biggest-losses').innerHTML = lossesHTML || '<p style="color:var(--mist);">Sem perdas</p>';
+    }
+  } catch (error) {
+    console.error('Erro ao carregar estatísticas:', error);
+  }
+}
+
+async function createAlert() {
+  const cardName = document.getElementById('alert-card-name').value;
+  const price = document.getElementById('alert-price').value;
+  const type = document.getElementById('alert-type').value;
+
+  if (!cardName || !price) {
+    alert('Preencha todos os campos');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/portfolio/alerts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: CURRENT_USER,
+        card_id: cardName.toLowerCase().replace(/ /g, '-'),
+        card_name: cardName,
+        threshold_price: parseFloat(price),
+        alert_type: type
+      })
+    });
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      alert('Alerta criado!');
+      document.getElementById('alert-card-name').value = '';
+      document.getElementById('alert-price').value = '';
+      loadAlerts();
+    }
+  } catch (error) {
+    console.error('Erro ao criar alerta:', error);
+  }
+}
+
+async function loadAlerts() {
+  try {
+    const response = await fetch(`/api/portfolio/alerts/${CURRENT_USER}`);
+    const data = await response.json();
+
+    if (data.status === 'success' && data.alerts.length > 0) {
+      const html = data.alerts.map(alert => `
+        <div style="background:var(--vault-2); padding:15px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-weight:bold;">${alert.card_name}</div>
+            <div style="font-size:12px; color:var(--mist);">${alert.alert_type === 'up' ? '📈 Preço subir acima de' : '📉 Preço cair abaixo de'} R$ ${alert.threshold_price.toFixed(2)}</div>
+          </div>
+          <button onclick="deleteAlert('${alert.id}')" style="padding:5px 10px; background:#ff6b6b; color:white; border:none; border-radius:5px; cursor:pointer;">
+            ✕
+          </button>
+        </div>
+      `).join('');
+      document.getElementById('alerts-list').innerHTML = html;
+    }
+  } catch (error) {
+    console.error('Erro ao carregar alertas:', error);
+  }
+}
+
+async function deleteAlert(alertId) {
+  try {
+    const response = await fetch(`/api/portfolio/alerts/${alertId}`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+    if (data.status === 'success') {
+      loadAlerts();
+    }
+  } catch (error) {
+    console.error('Erro ao remover alerta:', error);
+  }
+}
+
+// Inicializar quando a página abrir
+function initPortfolio() {
+  document.getElementById('portfolio-page').style.display = 'block';
+  loadCollections();
+}
+</script>
