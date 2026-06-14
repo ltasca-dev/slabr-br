@@ -170,9 +170,15 @@ def cards():
 
 @app.get("/api/cards/<cid>")
 def card(cid):
-    r=db().execute("""SELECT c.id,c.name,s.name set_name,c.set_id,c.number,c.rarity,c.types,c.release_date
+    r=db().execute("""SELECT c.id,c.name,s.name set_name,c.set_id,c.number,c.rarity,c.types,c.release_date,
+                             c.official_image_small,c.official_image_large
                       FROM cards c JOIN sets s ON s.id=c.set_id WHERE c.id=?""",(cid,)).fetchone()
-    return jsonify(card_row(r)) if r else (jsonify({"error":"not found"}),404)
+    if not r:
+        return (jsonify({"error":"not found"}),404)
+    d=card_row(r)
+    d["official_image_small"]=r["official_image_small"]
+    d["official_image_large"]=r["official_image_large"]
+    return jsonify({"ok":True,"card":d})
 
 @app.get("/api/offers/<cid>")
 def offers(cid):
