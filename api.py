@@ -1515,7 +1515,7 @@ footer{{border-top:1px solid var(--line);padding:30px 0;text-align:center;color:
         </div>
         <div class="stat-box">
             <div class="stat-label">Patrimônio Total</div>
-            <div class="stat-value">R$ {(stats['total_value'] or 0):,.0f}</div>
+            <div class="stat-value">R$ {(stats['total_value'] if stats else 0):,.0f}</div>
         </div>
     </div>
 
