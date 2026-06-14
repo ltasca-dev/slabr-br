@@ -354,21 +354,32 @@ async function renderMercado(){
 async function renderCatalogo(){
  $('#app').innerHTML=`
   <div style="padding:32px 0 6px"><div class="eyebrow">◆ Catálogo</div>
-   <h1 style="font-family:Bricolage Grotesque;font-weight:800;font-size:30px;letter-spacing:-.02em">Buscar carta</h1>
-   <p class="muted" style="margin:6px 0 18px">Clique pra ver as cópias certificadas e ofertas.</p></div>
-  <div class="searchbox"><input id="cq" placeholder="ex.: Charizard, Pikachu, Blastoise" autocomplete="off"><button id="cgo">Buscar</button></div>
-  <div class="chips">${['Charizard','Pikachu','Blastoise','Mewtwo','Snorlax'].map(n=>`<span class="chip" data-q="${n}">${n}</span>`).join('')}</div>
+   <h1 style="font-family:Bricolage Grotesque;font-weight:800;font-size:30px;letter-spacing:-.02em">Colecionadores</h1>
+   <p class="muted" style="margin:6px 0 18px">Explore as galerias visuais dos maiores colecionadores brasileiros.</p></div>
   <div class="grid" id="cgrid" style="margin-top:26px"></div>`;
- $('#cgo').onclick=()=>doCat();
- $('#cq').addEventListener('keydown',e=>{if(e.key==='Enter')doCat();});
- document.querySelectorAll('#app .chip[data-q]').forEach(ch=>ch.onclick=()=>{$('#cq').value=ch.dataset.q;doCat();});
- doCat('charizard');
+ doCat();
 }
-async function doCat(seed){
- const q=(seed||($('#cq')?$('#cq').value:'')||'').trim();
- if(seed&&$('#cq'))$('#cq').value=seed;
- const res=await J('/cards?q='+encodeURIComponent(q)+'&limit=30')||[];
- $('#cgrid').innerHTML=res.map(c=>`<div class="item" onclick="location.hash='#/carta/${c.id}'">${illus(c,c.graded?'<div class="pop"><span class="popbadge">'+c.graded+' no acrílico</span></div>':'')}<div class="cap"><div class="cn">${c.name}</div><div class="cm">${c.set} · #${c.num}</div></div></div>`).join('')||'<p class="muted">Nada encontrado.</p>';
+async function doCat(){
+ const res=await J('/api/colecionadores')||{};
+ const coletores=(res.colecionadores||[]).filter(c=>c.total_cards>0);
+ $('#cgrid').innerHTML=coletores.map(c=>`
+  <div class="item" onclick="location.hash='#/colecionador/${c.handle}'" style="cursor:pointer;padding:0;overflow:hidden">
+   <div style="background:linear-gradient(135deg,var(--vault) 0%,var(--vault-3) 100%);padding:24px;text-align:center;border-bottom:1px solid var(--line)">
+    <div style="font-weight:700;font-size:18px;color:var(--ice)">@${c.handle}</div>
+    <div style="font-size:12px;color:var(--mist)">📍 ${c.city||'Brasil'}</div>
+   </div>
+   <div style="padding:16px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+     <span style="color:var(--mist);font-size:12px">Cartas</span>
+     <span style="color:var(--champagne);font-weight:700">${c.total_cards||0}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between">
+     <span style="color:var(--mist);font-size:12px">Patrimônio</span>
+     <span style="color:var(--champagne);font-weight:700">R$ ${(c.total_value||0).toLocaleString('pt-BR')}</span>
+    </div>
+   </div>
+  </div>
+ `).join('')||'<p class="muted">Nenhum colecionador encontrado.</p>';
 }
 window.doCat=doCat;
 function priceChartSVG(points){

@@ -18,7 +18,7 @@ except ImportError:
     SCHEDULER_AVAILABLE = False
 
 DB   = os.environ.get("SLABR_DB", "pokemon_catalog.db")
-HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "slabr-home.html")
+HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "slabr_app.html")
 app  = Flask(__name__)
 app.secret_key = os.environ.get("SLABR_SECRET", "troque-este-segredo-em-producao")
 
