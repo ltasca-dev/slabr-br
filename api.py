@@ -1541,9 +1541,9 @@ async function loadGaleria() {{
         }}
 
         grid.innerHTML = data.cartas.map((c, idx) => `
-            <div class="gallery-card" style="animation:fadeIn 0.3s ease-in {{animation-delay: ${{idx * 30}}ms}}">
+            <div class="gallery-card" style="animation:fadeIn 0.3s ease-in ${{animation-delay: ${{idx * 30}}ms}}">
                 <div class="card-image loading" id="img-${{c.cert}}">
-                    <img src="${{c.image}}" alt="${{c.cardName}}" onload="this.parentElement.classList.remove('loading')" onerror="this.parentElement.textContent='Erro'>
+                    <img src="${{c.image}}" alt="${{c.cardName}}" onload="this.parentElement.classList.remove('loading')" onerror="this.parentElement.textContent='Erro carregando imagem'">
                     <span class="card-grade">${{c.grade}}</span>
                     ${{c.gem ? '<span class="card-gem">✨</span>' : ''}}
                 </div>
@@ -1554,11 +1554,14 @@ async function loadGaleria() {{
             </div>
         `).join('');
     }} catch (e) {{
-        console.error(e);
-        document.getElementById('cards-grid').innerHTML = '<div style="grid-column:1/-1;color:red;padding:20px">Erro ao carregar galeria</div>';
+        console.error('Erro ao carregar galeria:', e);
+        const grid = document.getElementById('cards-grid');
+        if (grid) {{
+            grid.innerHTML = '<div style="grid-column:1/-1;color:#ef4444;padding:20px;text-align:center">Erro ao carregar galeria. Tente recarregar a página.</div>';
+        }}
     }}
 }}
-loadGaleria();
+document.addEventListener('DOMContentLoaded', loadGaleria);
 </script>
 <style>
 @keyframes fadeIn {{
