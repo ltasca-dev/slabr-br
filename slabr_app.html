@@ -228,8 +228,8 @@ input:focus,select:focus{border-color:var(--champagne-dim)}
 <div class="wrap"><div id="app"></div></div>
 <div class="toast" id="toast"></div>
 <script>
-async function J(p){try{const r=await fetch('/api'+p);return r.ok?await r.json():null;}catch(e){return null;}}
-async function POST(p,b){try{const r=await fetch('/api'+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return await r.json().catch(()=>null);}catch(e){return null;}}
+async function J(p){try{const r=await fetch('/api'+p,{credentials:'include'});return r.ok?await r.json():null;}catch(e){return null;}}
+async function POST(p,b){try{const r=await fetch('/api'+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b),credentials:'include'});return await r.json().catch(()=>null);}catch(e){return null;}}
 const TYPE={Fire:["#ff7a18","#cf1020","#3a0a12"],Water:["#7dd3fc","#2563eb","#0b1f3a"],Grass:["#bef264","#65a30d","#1a2e05"],Lightning:["#fde047","#ca8a04","#3a2e05"],Psychic:["#d8b4fe","#7c3aed","#2a1065"],Fighting:["#fb923c","#9a3412","#3a1505"],Darkness:["#94a3b8","#334155","#0a0f1a"],Metal:["#cbd5e1","#64748b","#1e293b"],Fairy:["#f9a8d4","#db2777","#3a0a24"],Colorless:["#e5e7eb","#9ca3af","#1f2937"]};
 function bg(t){const c=TYPE[t]||TYPE.Colorless;return 'radial-gradient(120% 80% at 50% 25%,'+c[0]+','+c[1]+' 55%,'+c[2]+')';}
 function fmt(g){return String(g).replace('.',',');}
