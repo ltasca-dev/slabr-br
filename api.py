@@ -333,6 +333,7 @@ def create_graded():
 
 @app.get("/api/price-history/<cid>")
 def price_history(cid):
+    print(f"DEBUG: price_history called with {cid}", flush=True)
     rows=db().execute("SELECT d,price,currency FROM price_history WHERE card_id=? ORDER BY d",(cid,)).fetchall()
     if not rows: return jsonify({"found":False})
     cur=rows[-1]["currency"] or "EUR"
@@ -345,11 +346,13 @@ def price_history(cid):
         return round(sum(s)/len(s),2) if s else None
     vals=[p["v"] for p in pts]
     off=db().execute("SELECT declared_value_cents FROM graded_items WHERE card_id=? AND public=1 ORDER BY declared_value_cents",(cid,)).fetchall()
-    return jsonify({"found":True,"currency":cur,"rate":rate,"points":pts,
-                    "trend":vals[-1],"avg30":win(30),"avg7":win(7),"avg1":win(1),
-                    "min":min(vals),"max":max(vals),
-                    "offers_count":len(off),
-                    "offers_from":(off[0]["declared_value_cents"]/100) if off else None})
+    resp={"found":True,"currency":cur,"rate":rate,"points":pts,
+          "trend":vals[-1] if vals else None,"avg30":win(30),"avg7":win(7),"avg1":win(1),
+          "min":min(vals) if vals else None,"max":max(vals) if vals else None,
+          "offers_count":len(off),
+          "offers_from":(off[0]["declared_value_cents"]/100) if off else None}
+    print(f"DEBUG: returning {list(resp.keys())}", flush=True)
+    return jsonify(resp)
 
 @app.get("/api/price/<cid>")
 def price(cid):
