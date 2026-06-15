@@ -183,7 +183,7 @@ def card(cid):
     d=card_row(r)
     d["official_image_small"]=r["official_image_small"]
     d["official_image_large"]=r["official_image_large"]
-    return jsonify({"ok":True,"card":d})
+    return jsonify(d)
 
 @app.get("/api/offers/<cid>")
 def offers(cid):
